@@ -1,0 +1,119 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>Foydalanuvchilar boshqaruvi</h1>
+</div>
+
+{{#if users.length}}
+  <div class="table-responsive">
+    <table class="table table-striped align-middle">
+      <thead>
+        <tr>
+          <th>Ism</th>
+          <th>Email</th>
+          <th>Rol</th>
+          <th>Holat</th>
+          <th>Amallar</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each users}}
+          <tr>
+            <td>{{this.full_name}}</td>
+            <td>{{this.email}}</td>
+            <td><span class="badge bg-secondary">{{this.role}}</span></td>
+            <td>
+              {{#if this.is_active}}
+                <span class="badge bg-success">Faol</span>
+              {{else}}
+                <span class="badge bg-danger">Nofaol</span>
+              {{/if}}
+            </td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#roleModal{{this._id}}">
+                Rolni o'zgartirish
+              </button>
+            </td>
+          </tr>
+
+          <!-- Role Change Modal -->
+          <div class="modal fade" id="roleModal{{this._id}}" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">{{this.full_name}} — rolni o'zgartirish</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="/admin/users/{{this._id}}/role" method="POST" id="roleForm{{this._id}}">
+                  <div class="modal-body">
+                    <div class="mb-3">
+                      <label class="form-label">Yangi rol</label>
+                      <select class="form-select" name="role" required
+                        onchange="toggleDoctorFields('{{this._id}}', this.value)">
+                        <option value="patient" {{#if (eq this.role 'patient')}}selected{{/if}}>Patient</option>
+                        <option value="doctor" {{#if (eq this.role 'doctor')}}selected{{/if}}>Doctor</option>
+                        <option value="admin" {{#if (eq this.role 'admin')}}selected{{/if}}>Admin</option>
+                      </select>
+                    </div>
+
+                    <!-- Doctor extra fields (shown only when role=doctor) -->
+                    <div id="doctorFields{{this._id}}" style="display:{{#if (eq this.role 'doctor')}}block{{else}}none{{/if}}">
+                      <hr>
+                      <p class="text-muted small">Shifokor ma'lumotlari</p>
+                      <div class="mb-3">
+                        <label class="form-label">Bo'lim *</label>
+                        <select class="form-select" name="department_id">
+                          <option value="">Bo'limni tanlang</option>
+                          {{#each ../departments}}
+                            <option value="{{this._id}}"
+                              {{#if (eq this._id ../doctorInfo.department_id)}}selected{{/if}}>
+                              {{this.name}}
+                            </option>
+                          {{/each}}
+                        </select>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Mutaxassislik *</label>
+                        <input type="text" class="form-control" name="specialization"
+                          value="{{this.doctorInfo.specialization}}">
+                      </div>
+                      <div class="row">
+                        <div class="col-6 mb-3">
+                          <label class="form-label">Tajriba (yil)</label>
+                          <input type="number" class="form-control" name="experience" min="0"
+                            value="{{#if this.doctorInfo.experience}}{{this.doctorInfo.experience}}{{else}}0{{/if}}">
+                        </div>
+                        <div class="col-6 mb-3">
+                          <label class="form-label">Xona raqami *</label>
+                          <input type="text" class="form-control" name="room_number"
+                            value="{{this.doctorInfo.room_number}}">
+                        </div>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Biografiya</label>
+                        <textarea class="form-control" name="bio" rows="2">{{this.doctorInfo.bio}}</textarea>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bekor qilish</button>
+                    <button type="submit" class="btn btn-primary">Saqlash</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+{{else}}
+  <div class="alert alert-info">Hozircha foydalanuvchilar yo'q.</div>
+{{/if}}
+
+<script>
+function toggleDoctorFields(userId, role) {
+  const fields = document.getElementById('doctorFields' + userId);
+  fields.style.display = role === 'doctor' ? 'block' : 'none';
+}
+</script>

@@ -1,0 +1,233 @@
+<h1 class="mb-4">Qabulga yozilish</h1>
+
+<div class="row">
+  <div class="col-md-5">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Shifokor ma'lumotlari</h5>
+        {{#if doctor.user_id.profile}}
+          <img src="/uploads/user-profile/{{doctor.user_id.profile}}"
+            class="rounded-circle border mb-2"
+            width="64" height="64" style="object-fit:cover;">
+        {{/if}}
+        <p><strong>Ism:</strong> {{doctor.user_id.full_name}}</p>
+        <p><strong>Mutaxassislik:</strong> {{doctor.specialization}}</p>
+        <p><strong>Tajriba:</strong> {{doctor.experience}} yil</p>
+        <p><strong>Xona:</strong> {{doctor.room_number}}</p>
+        {{#if doctor.bio}}<p><strong>Bio:</strong> {{doctor.bio}}</p>{{/if}}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-7">
+    {{#if schedules.length}}
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Ish jadvali va qabul vaqtini tanlang</h5>
+
+          <div class="mb-3">
+            <label class="form-label">Ish kunlari</label>
+            <div class="d-flex flex-wrap gap-2" id="dayBtns">
+              {{#each schedules}}
+                <button type="button"
+                  class="btn btn-outline-primary day-btn"
+                  data-day="{{this.work_day}}"
+                  data-start="{{this.start_time}}"
+                  data-end="{{this.end_time}}">
+                  {{this.work_day}} ({{this.start_time}}–{{this.end_time}})
+                </button>
+              {{/each}}
+            </div>
+          </div>
+
+          <div class="mb-3" id="dateSection" style="display:none;">
+            <label class="form-label">Sana tanlang</label>
+            <input type="date" class="form-control" id="appointment_date">
+            <div class="form-text" id="dateHint"></div>
+          </div>
+
+          <div class="mb-3" id="timeSection" style="display:none;">
+            <label class="form-label">Vaqt tanlang (20 minutlik slotlar)</label>
+            <select class="form-select" id="appointment_time" required>
+              <option value="">Vaqtni tanlang</option>
+            </select>
+            <div class="form-text" id="timeHint"></div>
+          </div>
+
+          <button class="btn btn-primary w-100" id="submitBtn" style="display:none;">
+            Qabulga yozilish
+          </button>
+        </div>
+      </div>
+    {{else}}
+      <div class="alert alert-warning">
+        <i class="fas fa-calendar-times me-2"></i>
+        Bu shifokor hozircha ish jadvalini kiritmagan. Qabul qilish mumkin emas.
+      </div>
+      <a href="/doctors" class="btn btn-outline-secondary">Boshqa shifokorlar</a>
+    {{/if}}
+  </div>
+</div>
+
+<script>
+const doctorId = '{{doctor._id}}';
+const schedules = [
+  {{#each schedules}}
+  { day: '{{this.work_day}}', start: '{{this.start_time}}', end: '{{this.end_time}}', break_start: '{{this.break_start}}', break_end: '{{this.break_end}}' },
+  {{/each}}
+];
+
+const dayMap = {
+  monday: 1, tuesday: 2, wednesday: 3,
+  thursday: 4, friday: 5, saturday: 6, sunday: 0
+};
+
+let selectedDay = null;
+
+document.querySelectorAll('.day-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active', 'btn-primary'));
+    btn.classList.add('active', 'btn-primary');
+    btn.classList.remove('btn-outline-primary');
+
+    selectedDay = btn.dataset.day;
+    const start = btn.dataset.start;
+    const end = btn.dataset.end;
+
+    // Find next available date for this weekday
+    const targetDow = dayMap[selectedDay];
+    const today = new Date();
+    let d = new Date(today);
+    d.setHours(0,0,0,0);
+    for (let i = 0; i < 7; i++) {
+      if (d.getDay() === targetDow && d >= today) break;
+      d.setDate(d.getDate() + 1);
+    }
+
+    const dateInput = document.getElementById('appointment_date');
+    const minDate = d.toISOString().split('T')[0];
+    dateInput.value = minDate;
+    dateInput.min = minDate;
+
+    // Only allow selecting the correct weekday
+    dateInput.onchange = async () => {
+      const chosen = new Date(dateInput.value + 'T00:00:00');
+      if (chosen.getDay() !== targetDow) {
+        document.getElementById('dateHint').textContent = `Faqat ${selectedDay} kunlari tanlansin`;
+        dateInput.value = minDate;
+      } else {
+        document.getElementById('dateHint').textContent = '';
+        await loadTimeSlots(dateInput.value, start, end);
+      }
+    };
+
+    document.getElementById('dateHint').textContent = `Ish vaqti: ${start} – ${end}`;
+    document.getElementById('dateSection').style.display = 'block';
+    
+    // Load time slots for selected date
+    await loadTimeSlots(minDate, start, end);
+  });
+});
+
+async function loadTimeSlots(date, startTime, endTime) {
+  const timeSelect = document.getElementById('appointment_time');
+  timeSelect.innerHTML = '<option value="">Yuklanmoqda...</option>';
+  
+  try {
+    // Get booked appointments for this date
+    const res = await fetch(`/api/appointment/available-slots?doctor_id=${doctorId}&date=${date}`);
+    const bookedSlots = res.ok ? (await res.json()).data || [] : [];
+    
+    // Get break time from current schedule
+    const currentSchedule = schedules.find(s => s.day === selectedDay);
+    const breakStart = currentSchedule?.break_start;
+    const breakEnd = currentSchedule?.break_end;
+    
+    // Generate 20-minute slots
+    const slots = generateTimeSlots(startTime, endTime, bookedSlots, breakStart, breakEnd);
+    
+    timeSelect.innerHTML = '<option value="">Vaqtni tanlang</option>';
+    slots.forEach(slot => {
+      const option = document.createElement('option');
+      option.value = slot.time;
+      option.textContent = `${slot.time} - ${slot.endTime}${slot.booked ? ' (Band)' : ''}${slot.isBreak ? ' (Dam olish)' : ''}`;
+      option.disabled = slot.booked || slot.isBreak;
+      timeSelect.appendChild(option);
+    });
+    
+    document.getElementById('timeSection').style.display = 'block';
+    document.getElementById('submitBtn').style.display = 'block';
+    const availableCount = slots.filter(s => !s.booked && !s.isBreak).length;
+    document.getElementById('timeHint').textContent = availableCount + ' ta bo\'sh slot mavjud';
+  } catch (error) {
+    timeSelect.innerHTML = '<option value="">Xatolik yuz berdi</option>';
+  }
+}
+
+function generateTimeSlots(start, end, bookedSlots, breakStart, breakEnd) {
+  const slots = [];
+  const [startH, startM] = start.split(':').map(Number);
+  const [endH, endM] = end.split(':').map(Number);
+  
+  let currentH = startH;
+  let currentM = startM;
+  
+  while (currentH < endH || (currentH === endH && currentM < endM)) {
+    const time = `${String(currentH).padStart(2, '0')}:${String(currentM).padStart(2, '0')}`;
+    
+    // Calculate end time (20 minutes later)
+    let endSlotM = currentM + 20;
+    let endSlotH = currentH;
+    if (endSlotM >= 60) {
+      endSlotM -= 60;
+      endSlotH += 1;
+    }
+    const endTime = `${String(endSlotH).padStart(2, '0')}:${String(endSlotM).padStart(2, '0')}`;
+    
+    // Check if booked
+    const booked = bookedSlots.includes(time);
+    
+    // Check if in break time
+    let isBreak = false;
+    if (breakStart && breakEnd) {
+      isBreak = time >= breakStart && time < breakEnd;
+    }
+    
+    slots.push({ time, endTime, booked, isBreak });
+    
+    // Move to next slot
+    currentM += 20;
+    if (currentM >= 60) {
+      currentM -= 60;
+      currentH += 1;
+    }
+  }
+  
+  return slots;
+}
+
+document.getElementById('submitBtn')?.addEventListener('click', async () => {
+  const date = document.getElementById('appointment_date').value;
+  const time = document.getElementById('appointment_time').value;
+  if (!date || !time) return Toast.error('Sana va vaqtni tanlang');
+
+  const appointment_date = new Date(`${date}T${time}:00`).toISOString();
+
+  try {
+    const res = await fetch('/api/appointment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ doctor_id: doctorId, appointment_date }),
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      Toast.success('Qabulga muvaffaqiyatli yozildingiz');
+      setTimeout(() => window.location.href = '/patient/appointments', 1500);
+    } else {
+      Toast.error(data.message || 'Xatolik yuz berdi');
+    }
+  } catch {
+    Toast.error('Tarmoq xatosi');
+  }
+});
+</script>

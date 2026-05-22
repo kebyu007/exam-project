@@ -1,0 +1,38 @@
+<div class="row">
+  <div class="col-md-8 mx-auto">
+    <h1 class="mb-4">Toast Notification Test</h1>
+    
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Test qilish</h5>
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn btn-success" onclick="Toast.success('Bu muvaffaqiyatli xabar')">Success</button>
+          <button class="btn btn-danger" onclick="Toast.error('Bu xatolik xabari')">Error</button>
+          <button class="btn btn-warning" onclick="Toast.warning('Bu ogohlantirish xabari')">Warning</button>
+          <button class="btn btn-info" onclick="Toast.info('Bu ma\'lumot xabari')">Info</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-4">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Ishlatish</h5>
+        <pre class="bg-light p-3 rounded"><code>// Oddiy
+Toast.success('Muvaffaqiyatli saqlandi');
+Toast.error('Xatolik yuz berdi');
+Toast.warning('Diqqat!');
+Toast.info('Ma\'lumot');
+
+// Custom title bilan
+Toast.success('Ma\'lumot saqlandi', 'Bajarildi');
+Toast.error('Serverga ulanib bo\'lmadi', 'Tarmoq xatosi');
+
+// Fetch bilan
+const data = await fetchWithToast('/api/endpoint', {
+  method: 'POST',
+  body: JSON.stringify({ name: 'Test' })
+});</code></pre>
+      </div>
+    </div>
+  </div>
+</div>

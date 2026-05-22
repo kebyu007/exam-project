@@ -1,0 +1,31 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container">
+    <a class="navbar-brand" href="/">Smart Clinic</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="/">Bosh sahifa</a></li>
+        <li class="nav-item"><a class="nav-link" href="/doctors">Shifokorlar</a></li>
+        {{#if user}}
+          {{#if (eq user.role 'patient')}}
+            <li class="nav-item"><a class="nav-link" href="/patient/appointments">Mening qabullarim</a></li>
+          {{/if}}
+          {{#if (eq user.role 'doctor')}}
+            <li class="nav-item"><a class="nav-link" href="/doctor/appointments">Qabullar</a></li>
+            <li class="nav-item"><a class="nav-link" href="/doctor/schedule">Jadval</a></li>
+          {{/if}}
+          {{#if (eq user.role 'admin')}}
+            <li class="nav-item"><a class="nav-link" href="/admin">Admin panel</a></li>
+          {{/if}}
+          <li class="nav-item"><a class="nav-link" href="/profile">Profil</a></li>
+          <li class="nav-item"><a class="nav-link" href="/logout">Chiqish</a></li>
+        {{else}}
+          <li class="nav-item"><a class="nav-link" href="/login">Kirish</a></li>
+          <li class="nav-item"><a class="nav-link" href="/register">Ro'yxatdan o'tish</a></li>
+        {{/if}}
+      </ul>
+    </div>
+  </div>
+</nav>

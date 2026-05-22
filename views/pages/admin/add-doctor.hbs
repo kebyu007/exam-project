@@ -1,0 +1,68 @@
+<h1 class="mb-4">Yangi shifokor qo'shish</h1>
+
+<div class="card">
+  <div class="card-body">
+    <form action="/admin/add-doctor" method="POST">
+      <h5 class="card-title mb-3">Foydalanuvchi ma'lumotlari</h5>
+      
+      <div class="mb-3">
+        <label for="full_name" class="form-label">To'liq ism *</label>
+        <input type="text" class="form-control" id="full_name" name="full_name" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="email" class="form-label">Email *</label>
+        <input type="email" class="form-control" id="email" name="email" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Parol *</label>
+        <input type="password" class="form-control" id="password" name="password" required minlength="6">
+        <div class="form-text">Kamida 6 ta belgi</div>
+      </div>
+
+      <hr class="my-4">
+
+      <h5 class="card-title mb-3">Shifokor ma'lumotlari</h5>
+
+      <div class="mb-3">
+        <label for="department_id" class="form-label">Bo'lim *</label>
+        <select class="form-select" id="department_id" name="department_id" required>
+          <option value="">Bo'limni tanlang</option>
+          {{#each departments}}
+            <option value="{{this._id}}">{{this.name}}</option>
+          {{/each}}
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="specialization" class="form-label">Mutaxassislik *</label>
+        <input type="text" class="form-control" id="specialization" name="specialization" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="experience" class="form-label">Tajriba (yil) *</label>
+        <input type="number" class="form-control" id="experience" name="experience" required min="0">
+      </div>
+
+      <div class="mb-3">
+        <label for="room_number" class="form-label">Xona raqami *</label>
+        <input type="text" class="form-control" id="room_number" name="room_number" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="bio" class="form-label">Biografiya</label>
+        <textarea class="form-control" id="bio" name="bio" rows="3"></textarea>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Qo'shish</button>
+        <a href="/admin/doctors" class="btn btn-secondary">Bekor qilish</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{#if error}}
+  <div class="alert alert-danger mt-3">{{error}}</div>
+{{/if}}

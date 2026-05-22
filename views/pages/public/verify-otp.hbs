@@ -1,0 +1,49 @@
+<div class="row justify-content-center">
+  <div class="col-md-5">
+    <div class="card">
+      <div class="card-body p-4 text-center">
+        <h4 class="mb-2">Email tasdiqlash</h4>
+        <p class="text-muted small mb-4">
+          <strong>{{email}}</strong> manziliga 6 xonali kod yuborildi.
+        </p>
+        <div id="msg"></div>
+        <form id="otpForm">
+          <input type="hidden" name="email" value="{{email}}">
+          <div class="mb-3">
+            <input type="text" class="form-control form-control-lg text-center"
+              name="otp" maxlength="6" placeholder="000000"
+              style="letter-spacing:8px;font-size:1.5rem;" required autofocus>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Tasdiqlash</button>
+        </form>
+        <div class="mt-3">
+          <a href="/register" class="small text-muted">Qaytish</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('otpForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = e.target.email.value;
+  const otp = e.target.otp.value;
+  const msg = document.getElementById('msg');
+  try {
+    const res = await fetch('/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, otp }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      window.location.href = data.redirect || '/';
+    } else {
+      msg.innerHTML = `<div class="alert alert-danger">${data.message || 'Kod noto\'g\'ri'}</div>`;
+    }
+  } catch {
+    msg.innerHTML = '<div class="alert alert-danger">Xatolik yuz berdi</div>';
+  }
+});
+</script>

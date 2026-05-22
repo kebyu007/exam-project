@@ -1,319 +1,218 @@
 # Smart Clinic Appointment System
 
-## Project Description
+## Loyiha haqida
 
-Smart Clinic Appointment System is a healthcare appointment platform where patients can book doctor appointments online.
+Smart Clinic Appointment System - bu bemorlar onlayn shifokor qabuliga yozilishi mumkin bo'lgan tibbiy appointment platformasi.
 
-The system allows:
-- Patients to book appointments
-- Doctors to manage schedules
-- Admins to manage clinic data
-- Telegram and email notifications
+## Texnologiyalar
 
-Frontend must be rendered using HBS inside NestJS.
+### Backend
+- **NestJS** - Node.js framework
+- **TypeScript** - Dasturlash tili
+- **MongoDB** - Ma'lumotlar bazasi
+- **Mongoose** - ODM
+- **JWT** - Autentifikatsiya
+- **Nodemailer** - Email yuborish
+- **Winston** - Logging
+- **HBS (Handlebars)** - Template engine
 
----
+### Frontend
+- **HBS (Handlebars)** - Server-side rendering
+- **Bootstrap 5** - CSS framework
+- **Vanilla JavaScript** - Client-side logic
 
-# Technologies
+## Asosiy funksiyalar
 
-## Backend
-- NestJS
-- TypeScript
-- Sequelize ORM or MongoDB
-- PostgreSQL
-- JWT Authentication
-- Nodemailer
-- Multer
-- Telegraf
-- Jest
+### Autentifikatsiya
+- Ro'yxatdan o'tish
+- Kirish
+- Email aktivatsiya
+- JWT autentifikatsiya
 
-## Frontend
-- HBS (Handlebars)
-- Bootstrap 5
+### Bemor (Patient) funksiyalari
+- Shifokorlarni ko'rish
+- Qabulga yozilish
+- Qabullar tarixini ko'rish
+- Profilni boshqarish
 
----
+### Shifokor (Doctor) funksiyalari
+- Ish jadvalini boshqarish
+- Qabullarni tasdiqlash
+- Bemorlar ro'yxatini ko'rish
 
-# Main Features
+### Admin funksiyalari
+- Shifokorlarni boshqarish
+- Bo'limlarni boshqarish
+- Foydalanuvchilarni boshqarish
 
-## Authentication
-- Register
-- Login
-- Email activation
-- JWT Authentication
-
-## Patient Features
-- Browse doctors
-- Book appointments
-- View appointment history
-
-## Doctor Features
-- Manage schedules
-- Approve appointments
-- View patient list
-
-## Admin Features
-- Manage doctors
-- Manage departments
-- Manage users
-
-## Telegram Bot
-- Appointment reminders
-- Doctor schedules
-- Daily appointment reports
-
----
-
-# Database Models
-
-## User
-```ts
-id
-full_name
-email
-password
-role
-telegram_id
-is_active
-```
-
-## Doctor
-```ts
-id
-specialization
-experience
-room_number
-user_id
-```
-
-## Department
-```ts
-id
-name
-```
-
-## Appointment
-```ts
-id
-patient_id
-doctor_id
-appointment_date
-status
-```
-
-## Schedule
-```ts
-id
-doctor_id
-work_day
-start_time
-end_time
-```
-
----
-
-# Folder Structure
+## O'rnatish
 
 ```bash
+# Dependencies o'rnatish
+pnpm install
+
+# .env faylni sozlash
+cp .env.sample .env
+# .env faylda kerakli o'zgaruvchilarni to'ldiring
+
+# MongoDB ishga tushirish (Docker)
+docker run -d -p 27017:27017 --name mongodb mongo:latest
+
+# Development rejimda ishga tushirish
+pnpm run start:dev
+```
+
+## Environment o'zgaruvchilari
+
+```env
+PORT=3000
+MONGO_URL=mongodb://localhost:27017/smart-clinic
+JWT_SECRET=your-secret-key
+JWT_EXPIRES_IN=7d
+COOKIE_SECRET=your-cookie-secret
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
+```
+
+## Loyiha strukturasi
+
+```
 src/
-│
-├── auth/
-├── users/
-├── doctors/
-├── appointments/
-├── schedules/
-├── telegram/
-├── mail/
-├── common/
-│   ├── guards/
-│   ├── filters/
-│   ├── interceptors/
-│   ├── pipes/
-│   └── decorators/
-│
-├── views/
-├── public/
-└── main.ts
+├── auth/                 # Autentifikatsiya moduli
+├── users/                # Foydalanuvchilar moduli
+├── doctors/              # Shifokorlar moduli
+├── appointments/         # Qabullar moduli
+├── schedules/            # Jadvallar moduli
+├── departments/          # Bo'limlar moduli
+├── email/                # Email xizmati
+├── pages/                # HBS sahifalar controller
+├── common/               # Umumiy komponentlar
+│   ├── guards/          # Auth va Roles guardlar
+│   ├── filters/         # Exception filterlar
+│   ├── interceptors/    # Interceptorlar
+│   ├── pipes/           # Custom pipelar
+│   └── decorators/      # Custom decoratorlar
+├── core/                 # Core funksiyalar
+│   ├── constants/       # Konstantalar
+│   └── database/        # Database konfiguratsiya
+├── config/               # Konfiguratsiya
+└── main.ts              # Entry point
+
+views/
+├── layouts/             # Layout templatelar
+├── partials/            # Partial templatelar
+└── pages/               # Sahifa templatelar
+    ├── public/          # Umumiy sahifalar
+    ├── patient/         # Bemor sahifalari
+    ├── doctor/          # Shifokor sahifalari
+    └── admin/           # Admin sahifalari
+
+public/
+└── css/                 # CSS fayllar
 ```
 
----
+## API Endpoints
 
-# Lessons Covered
+### Auth
+- `POST /auth/register` - Ro'yxatdan o'tish
+- `POST /auth/login` - Kirish
+- `GET /auth/logout` - Chiqish
 
-## Lesson 2
-- Sequelize ORM
-- Relations
-- CRUD
+### Doctors
+- `GET /api/doctors` - Barcha shifokorlar
+- `GET /api/doctors/:id` - Bitta shifokor
+- `POST /api/doctors` - Yangi shifokor (Admin)
+- `PUT /api/doctors/:id` - Shifokorni yangilash (Admin)
+- `DELETE /api/doctors/:id` - Shifokorni o'chirish (Admin)
 
-## Lesson 3-5
-- TypeScript
-- OOP
-- Utility Types
-- Generics
-- Decorators
+### Appointments
+- `GET /api/appointments` - Barcha qabullar
+- `GET /api/appointments/my` - Mening qabullarim (Patient)
+- `POST /api/appointments` - Yangi qabul (Patient)
+- `PUT /api/appointments/:id/status` - Qabul holatini o'zgartirish (Doctor)
 
-## Lesson 6
-- Controllers
-- Routing
-- Request handling
+### Schedules
+- `GET /api/schedules` - Barcha jadvallar
+- `GET /api/schedules/doctor/:id` - Shifokor jadvali
+- `POST /api/schedules` - Yangi jadval (Doctor)
+- `PUT /api/schedules/:id` - Jadvalni yangilash (Doctor)
+- `DELETE /api/schedules/:id` - Jadvalni o'chirish (Doctor)
 
-## Lesson 7
-- Providers
-- Dependency Injection
-- Modules
+### Departments
+- `GET /api/departments` - Barcha bo'limlar
+- `POST /api/departments` - Yangi bo'lim (Admin)
+- `PUT /api/departments/:id` - Bo'limni yangilash (Admin)
+- `DELETE /api/departments/:id` - Bo'limni o'chirish (Admin)
 
-## Lesson 8
-- Middleware
-- Exception Filters
+## Web sahifalari
 
-## Lesson 9
-- Pipes
-- Guards
-- ValidationPipe
+### Public sahifalar
+- `/` - Bosh sahifa
+- `/doctors` - Shifokorlar ro'yxati
+- `/auth/login` - Kirish sahifasi
+- `/auth/register` - Ro'yxatdan o'tish sahifasi
 
-## Lesson 10
-- Interceptors
-- Custom Decorators
+### Patient sahifalari
+- `/patient/appointments` - Mening qabullarim
+- `/patient/profile` - Profil
 
-## Lesson 11
-- CRUD operations
+### Doctor sahifalari
+- `/doctor/appointments` - Qabullar ro'yxati
+- `/doctor/schedule` - Ish jadvali
 
-## Lesson 12
-- File uploads
-- Static files
+### Admin sahifalari
+- `/admin/doctors` - Shifokorlarni boshqarish
+- `/admin/departments` - Bo'limlarni boshqarish
 
-## Lesson 13
-- Real project architecture
+## Rollar
 
-## Lesson 14-16
-- Unit tests
-- E2E tests
+- **viewer** - Umumiy sahifalarni ko'rish
+- **patient** - Bemor funksiyalari
+- **doctor** - Shifokor funksiyalari
+- **admin** - Admin funksiyalari
 
-## Lesson 17
-- Sending emails
-
-## Lesson 18-19
-- Telegram bot development
-
----
-
-# Authentication Roles
-
-## Roles
-- Admin
-- Doctor
-- Patient
-
----
-
-# Middleware Tasks
-
-Students must implement:
-- Request logger
-- Auth middleware
-
----
-
-# Guards
-
-Students must create:
-- JwtAuthGuard
-- RolesGuard
-
----
-
-# Custom Pipes
-
-Students must create:
-- ParseAppointmentIdPipe
-- DateValidationPipe
-
----
-
-# Interceptors
-
-Students must create:
-- LoggingInterceptor
-- ResponseTransformInterceptor
-
----
-
-# Exception Filters
-
-Students must create:
-- HttpExceptionFilter
-- DatabaseExceptionFilter
-
----
-
-# Frontend Pages
-
-## Public Pages
-- Home
-- Doctors
-- Login
-- Register
-
-## Patient Pages
-- My Appointments
-- Profile
-
-## Doctor Pages
-- Appointment List
-- Schedule Management
-
-## Admin Pages
-- Doctors Management
-- Departments Management
-
----
-
-# Telegram Bot Commands
+## Testing
 
 ```bash
-/start
-/myappointments
-/doctors
-/help
+# Unit testlar
+pnpm run test
+
+# E2E testlar
+pnpm run test:e2e
+
+# Test coverage
+pnpm run test:cov
 ```
 
----
+## Production
 
-# Validation Requirements
+```bash
+# Build
+pnpm run build
 
-- Email validation
-- Appointment date validation
-- Schedule validation
+# Production rejimda ishga tushirish
+pnpm run start:prod
+```
 
----
+## Xususiyatlar
 
-# Additional Tasks
+- ✅ JWT autentifikatsiya
+- ✅ Role-based access control (RBAC)
+- ✅ Server-side rendering (HBS)
+- ✅ Email xabarnomalar
+- ✅ File upload (profil rasmlari)
+- ✅ Logging (Winston)
+- ✅ Validation (class-validator)
+- ✅ Error handling
+- ✅ MongoDB integration
+- ✅ Responsive design (Bootstrap 5)
 
-## Easy
-- Pagination
+## Muallif
 
-## Medium
-- Doctor search
+Smart Clinic Appointment System
 
-## Hard
-- Appointment calendar system
+## Litsenziya
 
----
-
-# Time Duration
-
-Estimated completion time:
-- 3 days
-
----
-
-# Expected Outcome
-
-Students will learn:
-- Real NestJS architecture
-- Sequelize ORM
-- Authentication
-- Telegram bots
-- Testing
-- File uploads
-- HBS rendering
-- Validation and guards
+MIT

@@ -1,0 +1,73 @@
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <h2 class="card-title text-center mb-4">Ro'yxatdan o'tish</h2>
+
+        <form id="registerForm">
+          <div class="mb-3">
+            <label for="full_name" class="form-label">To'liq ism</label>
+            <input type="text" class="form-control" id="full_name" name="full_name" required>
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Parol</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+          </div>
+          <div class="mb-3">
+            <label for="confirm_password" class="form-label">Parolni tasdiqlang</label>
+            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Ro'yxatdan o'tish</button>
+        </form>
+
+        <div class="text-center mt-3">
+          <p>Hisobingiz bormi? <a href="/login">Kirish</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const data = Object.fromEntries(formData);
+
+  console.log('Toast object:', typeof Toast, Toast);
+
+  if (data.password !== data.confirm_password) {
+    Toast.error('Parollar mos kelmadi');
+    return;
+  }
+
+  const { confirm_password, ...payload } = data;
+
+  try {
+    const response = await fetch('/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+    console.log('Response:', response.status, result);
+
+    if (response.ok) {
+      Toast.success('Emailga tasdiqlash kodi yuborildi');
+      setTimeout(() => window.location.href = result.redirect, 1000);
+    } else {
+      const msg = Array.isArray(result.message) ? result.message[0] : result.message;
+      console.log('Error message:', msg);
+      Toast.error(msg || 'Ro\'yxatdan o\'tish xatosi');
+    }
+  } catch (error) {
+    console.error('Catch error:', error);
+    Toast.error('Tarmoq xatosi');
+  }
+});
+</script>

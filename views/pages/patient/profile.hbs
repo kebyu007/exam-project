@@ -1,0 +1,70 @@
+<h1 class="mb-4">Mening profilim</h1>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Shaxsiy ma'lumotlar</h5>
+        <p><strong>Ism:</strong> {{user.full_name}}</p>
+        <p><strong>Email:</strong> {{user.email}}</p>
+        <p><strong>Rol:</strong> {{user.role}}</p>
+        <p><strong>Holat:</strong> {{#if user.is_active}}Faol{{else}}Nofaol{{/if}}</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Profil rasmini yangilash</h5>
+        <form action="/patient/profile/upload" method="POST" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label for="profile" class="form-label">Rasm tanlang</label>
+            <input type="file" class="form-control" id="profile" name="profile" accept="image/*" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Yuklash</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Qabullar tarixi</h5>
+        {{#if appointments.length}}
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Shifokor</th>
+                <th>Sana</th>
+                <th>Holat</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each appointments}}
+                <tr>
+                  <td>{{this.doctor_id.user_id.full_name}}</td>
+                  <td>{{formatDate this.appointment_date}}</td>
+                  <td>
+                    {{#if (eq this.status 'pending')}}
+                      <span class="badge badge-pending">Kutilmoqda</span>
+                    {{else if (eq this.status 'confirmed')}}
+                      <span class="badge badge-confirmed">Tasdiqlangan</span>
+                    {{else if (eq this.status 'done')}}
+                      <span class="badge badge-done">Bajarilgan</span>
+                    {{/if}}
+                  </td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        {{else}}
+          <p class="text-muted">Hozircha qabullar yo'q</p>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+</div>

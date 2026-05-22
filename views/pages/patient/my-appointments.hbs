@@ -1,0 +1,46 @@
+<h1 class="mb-4">Mening qabullarim</h1>
+
+{{#if appointments.length}}
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Shifokor</th>
+          <th>Sana</th>
+          <th>Vaqt</th>
+          <th>Holat</th>
+          <th>Amallar</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each appointments}}
+          <tr>
+            <td>{{this.doctor_id.user_id.full_name}}</td>
+            <td>{{formatDate this.appointment_date}}</td>
+            <td>{{#if this.appointment_time}}{{this.appointment_time}}{{else}}-{{/if}}</td>
+            <td>
+              {{#if (eq this.status 'pending')}}
+                <span class="badge bg-warning">Kutilmoqda</span>
+              {{else if (eq this.status 'confirmed')}}
+                <span class="badge bg-success">Tasdiqlangan</span>
+              {{else if (eq this.status 'cancelled')}}
+                <span class="badge bg-danger">Bekor qilingan</span>
+              {{else}}
+                <span class="badge bg-secondary">{{this.status}}</span>
+              {{/if}}
+            </td>
+            <td>
+              {{#if (eq this.status 'pending')}}
+                <form action="/patient/appointments/{{this._id}}/cancel" method="POST" style="display:inline;">
+                  <button type="submit" class="btn btn-sm btn-danger">Bekor qilish</button>
+                </form>
+              {{/if}}
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+{{else}}
+  <div class="alert alert-info">Sizda hali qabullar yo'q. <a href="/doctors">Shifokorlarni ko'ring</a></div>
+{{/if}}

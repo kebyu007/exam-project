@@ -1,0 +1,49 @@
+<h1 class="mb-4">Qabullar ro'yxati</h1>
+
+{{#if appointments.length}}
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Bemor</th>
+          <th>Sana</th>
+          <th>Vaqt</th>
+          <th>Holat</th>
+          <th>Amallar</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each appointments}}
+          <tr>
+            <td>{{this.patient_id.full_name}}</td>
+            <td>{{formatDate this.appointment_date}}</td>
+            <td>{{#if this.appointment_time}}{{this.appointment_time}}{{else}}-{{/if}}</td>
+            <td>
+              {{#if (eq this.status 'pending')}}
+                <span class="badge bg-warning">Kutilmoqda</span>
+              {{else if (eq this.status 'confirmed')}}
+                <span class="badge bg-success">Tasdiqlangan</span>
+              {{else if (eq this.status 'cancelled')}}
+                <span class="badge bg-danger">Bekor qilingan</span>
+              {{else}}
+                <span class="badge bg-secondary">{{this.status}}</span>
+              {{/if}}
+            </td>
+            <td>
+              {{#if (eq this.status 'pending')}}
+                <form action="/doctor/appointments/{{this._id}}/confirm" method="POST" style="display:inline;">
+                  <button type="submit" class="btn btn-sm btn-success">Tasdiqlash</button>
+                </form>
+                <form action="/doctor/appointments/{{this._id}}/cancel" method="POST" style="display:inline;">
+                  <button type="submit" class="btn btn-sm btn-danger">Rad etish</button>
+                </form>
+              {{/if}}
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+{{else}}
+  <div class="alert alert-info">Hozircha qabullar yo'q.</div>
+{{/if}}

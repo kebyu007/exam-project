@@ -1,0 +1,55 @@
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <h2 class="card-title text-center mb-4">Kirish</h2>
+
+        <form id="loginForm">
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Parol</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Kirish</button>
+        </form>
+
+        <div class="text-center mt-3">
+          <p>Hisobingiz yo'qmi? <a href="/register">Ro'yxatdan o'ting</a></p>
+          <a href="/forgot-password" class="small text-muted">Parolni unutdingizmi?</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  
+  try {
+    const response = await fetch('/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.fromEntries(formData))
+    });
+
+    const data = await response.json();
+    console.log('Response:', response.status, data);
+
+    if (response.ok) {
+      Toast.success('Tizimga muvaffaqiyatli kirdingiz');
+      setTimeout(() => window.location.href = data.redirect || '/', 1000);
+    } else {
+      const msg = Array.isArray(data.message) ? data.message[0] : data.message;
+      Toast.error(msg || 'Kirish xatosi');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    Toast.error('Tarmoq xatosi');
+  }
+});
+</script>

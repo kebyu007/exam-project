@@ -1,0 +1,37 @@
+<div class="hero bg-light p-5 rounded">
+  <h1 class="display-4">Smart Clinic'ga xush kelibsiz!</h1>
+  <p class="lead">Onlayn shifokor qabuliga yoziling va sog'ligingizni saqlang.</p>
+  <hr class="my-4">
+  <p>Bizning tizimimiz orqali siz osongina shifokorga yozilishingiz mumkin.</p>
+  <a class="btn btn-primary btn-lg" href="/doctors" role="button">Shifokorlarni ko'rish</a>
+  {{#unless user}}
+    <a class="btn btn-outline-primary btn-lg" href="/register" role="button">Ro'yxatdan o'tish</a>
+  {{/unless}}
+</div>
+
+<div class="row mt-5">
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body text-center">
+        <h5 class="card-title">Oson qabulga yozilish</h5>
+        <p class="card-text">Bir necha bosish bilan shifokorga yoziling</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body text-center">
+        <h5 class="card-title">Malakali shifokorlar</h5>
+        <p class="card-text">Tajribali mutaxassislar xizmatingizda</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body text-center">
+        <h5 class="card-title">Onlayn boshqaruv</h5>
+        <p class="card-text">Qabullaringizni onlayn kuzatib boring</p>
+      </div>
+    </div>
+  </div>
+</div>

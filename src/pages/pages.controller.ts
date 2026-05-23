@@ -1,30 +1,19 @@
 import { Body, Controller, Get, Post, Req, Res, Param, Query, UseInterceptors, UploadedFile } from '@nestjs/common';
 import type { Request, Response } from 'express';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Appointment } from '../modules/appointment/models/appointment.model';
-import { Department } from '../modules/department/models/department.model';
-import { Doctor } from '../modules/doctors/models/doctor.model';
-import { Schedule } from '../modules/schedule/models/schedules.model';
-import { User } from '../modules/users/models/user.model';
 import { Protected } from '@/common/decorators/protected.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { UserRoles } from '@/core/constants/constants';
-import * as bcrypt from 'bcrypt';
+import { AppointmentService } from '../modules/appointment/appointment.service';
+import { ScheduleService } from '../modules/schedule/schedule.service';
+import { PagesService } from './pages.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
-
-const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'user-profile');
 
 @Controller()
 export class PagesController {
   constructor(
-    @InjectModel(Appointment.name) private readonly appointmentModel: Model<Appointment>,
-    @InjectModel(Department.name) private readonly departmentModel: Model<Department>,
-    @InjectModel(Doctor.name) private readonly doctorModel: Model<Doctor>,
-    @InjectModel(Schedule.name) private readonly scheduleModel: Model<Schedule>,
-    @InjectModel(User.name) private readonly userModel: Model<User>,
+    private readonly pagesService: PagesService,
+    private readonly appointmentService: AppointmentService,
+    private readonly scheduleService: ScheduleService,
   ) {}
 
   // ─── Public Pages ───────────────────────────────────────────────────────────
@@ -32,7 +21,7 @@ export class PagesController {
   @Protected(false)
   @Roles([UserRoles.viewer])
   @Get('/')
-  async homePage(@Req() req: Request & { user?: any }, @Res() res: Response) {
+  homePage(@Req() req: Request & { user?: any }, @Res() res: Response) {
     return res.render('pages/public/home', { title: 'Bosh sahifa', user: req.user });
   }
 
@@ -40,7 +29,7 @@ export class PagesController {
   @Roles([UserRoles.viewer])
   @Get('doctors')
   async doctorsPage(@Req() req: Request & { user?: any }, @Res() res: Response) {
-    const doctors = await this.doctorModel.find().populate('user_id').populate('department_id').lean();
+    const doctors = await this.pagesService.getDoctors();
     return res.render('pages/public/doctors', { title: 'Shifokorlar', doctors, user: req.user });
   }
 
@@ -101,28 +90,15 @@ export class PagesController {
   @Roles([UserRoles.patient])
   @Get('patient/appointments')
   async patientAppointments(@Req() req: Request & { user: any }, @Res() res: Response) {
-    const { Types } = await import('mongoose');
-    const appointments = await this.appointmentModel
-      .find({ patient_id: new Types.ObjectId(req.user.id) })
-      .populate({ 
-        path: 'doctor_id', 
-        populate: { path: 'user_id' } 
-      })
-      .sort({ appointment_date: -1, appointment_time: 1 })
-      .lean();
-    console.log('👤 Patient appointments:', appointments.length, appointments);
-    return res.render('pages/patient/my-appointments', {
-      title: 'Mening qabullarim',
-      appointments,
-      user: req.user,
-    });
+    const appointments = await this.pagesService.getPatientAppointments(req.user.id);
+    return res.render('pages/patient/my-appointments', { title: 'Mening qabullarim', appointments, user: req.user });
   }
 
   @Protected(true)
   @Roles([UserRoles.patient])
   @Post('patient/appointments/:id/cancel')
   async cancelAppointment(@Param('id') id: string, @Res() res: Response) {
-    await this.appointmentModel.findByIdAndUpdate(id, { status: 'cancelled' });
+    await this.appointmentService.cancelAppointment(id);
     return res.redirect('/patient/appointments');
   }
 
@@ -130,17 +106,19 @@ export class PagesController {
   @Roles([UserRoles.patient, UserRoles.doctor, UserRoles.admin])
   @Get('profile')
   async profilePage(@Req() req: Request & { user: any }, @Res() res: Response) {
-    const dbUser = await this.userModel.findById(req.user.id).select('-password').lean();
-    return res.render('pages/profile', { title: 'Profil', user: dbUser });
+    const user = await this.pagesService.getProfileUser(req.user.id);
+    return res.render('pages/profile', {
+      title: 'Profil',
+      user,
+      botUsername: process.env.TELEGRAM_BOT_USERNAME || 'your_bot',
+    });
   }
 
   @Protected(true)
   @Roles([UserRoles.patient, UserRoles.doctor, UserRoles.admin])
   @Post('profile/update')
   async profileUpdate(@Req() req: Request & { user: any }, @Body() body: any, @Res() res: Response) {
-    const update: any = {};
-    if (body.full_name) update.full_name = body.full_name;
-    await this.userModel.findByIdAndUpdate(req.user.id, update);
+    if (body.full_name) await this.pagesService.updateProfileName(req.user.id, body.full_name);
     return res.redirect('/profile');
   }
 
@@ -153,13 +131,7 @@ export class PagesController {
     @UploadedFile() file: Express.Multer.File,
     @Res() res: Response,
   ) {
-    if (file) {
-      await fs.mkdir(UPLOAD_DIR, { recursive: true });
-      const ext = file.mimetype.split('/').at(-1);
-      const filename = `${req.user.id}.${ext}`;
-      await fs.writeFile(path.join(UPLOAD_DIR, filename), file.buffer);
-      await this.userModel.findByIdAndUpdate(req.user.id, { profile: filename });
-    }
+    if (file) await this.pagesService.uploadProfilePhoto(req.user.id, file);
     return res.redirect('/profile');
   }
 
@@ -167,23 +139,9 @@ export class PagesController {
   @Roles([UserRoles.patient])
   @Get('patient/book/:doctorId')
   async patientBooking(@Param('doctorId') doctorId: string, @Req() req: Request & { user: any }, @Res() res: Response) {
-    const doctor = await this.doctorModel.findById(doctorId).populate('user_id').lean();
-    if (!doctor) return res.redirect('/doctors');
-    const schedules = await this.scheduleModel.find({ doctor_id: (doctor as any)._id }).lean();
-    if (!schedules.length) {
-      return res.render('pages/patient/book-appointment', {
-        title: 'Qabulga yozilish',
-        doctor,
-        schedules: [],
-        user: req.user,
-      });
-    }
-    return res.render('pages/patient/book-appointment', {
-      title: 'Qabulga yozilish',
-      doctor,
-      schedules,
-      user: req.user,
-    });
+    const data = await this.pagesService.getDoctorBookingData(doctorId);
+    if (!data) return res.redirect('/doctors');
+    return res.render('pages/patient/book-appointment', { title: 'Qabulga yozilish', ...data, user: req.user });
   }
 
   // ─── Doctor Pages ───────────────────────────────────────────────────────────
@@ -192,28 +150,17 @@ export class PagesController {
   @Roles([UserRoles.doctor])
   @Get('doctor/appointments')
   async doctorAppointments(@Req() req: Request & { user: any }, @Res() res: Response) {
-    const doctor = await this.doctorModel.findOne({ user_id: req.user.id }).lean();
-    console.log('🔍 Doctor found:', doctor);
+    const doctor = await this.pagesService.getDoctorByUserId(req.user.id);
     if (!doctor) return res.redirect('/');
-
-    const appointments = await this.appointmentModel
-      .find({ doctor_id: (doctor as any)._id })
-      .populate('patient_id')
-      .sort({ appointment_date: -1, appointment_time: 1 })
-      .lean();
-    console.log('📋 Appointments found:', appointments.length, appointments);
-    return res.render('pages/doctor/appointment-list', {
-      title: 'Qabullar',
-      appointments,
-      user: req.user,
-    });
+    const appointments = await this.pagesService.getDoctorAppointments((doctor as any)._id.toString());
+    return res.render('pages/doctor/appointment-list', { title: 'Qabullar', appointments, user: req.user });
   }
 
   @Protected(true)
   @Roles([UserRoles.doctor])
   @Post('doctor/appointments/:id/confirm')
   async confirmAppointment(@Param('id') id: string, @Res() res: Response) {
-    await this.appointmentModel.findByIdAndUpdate(id, { status: 'confirmed' });
+    await this.appointmentService.confirmAppointment(id);
     return res.redirect('/doctor/appointments');
   }
 
@@ -221,7 +168,19 @@ export class PagesController {
   @Roles([UserRoles.doctor])
   @Post('doctor/appointments/:id/cancel')
   async doctorCancelAppointment(@Param('id') id: string, @Res() res: Response) {
-    await this.appointmentModel.findByIdAndUpdate(id, { status: 'cancelled' });
+    await this.appointmentService.cancelAppointment(id);
+    return res.redirect('/doctor/appointments');
+  }
+
+  @Protected(true)
+  @Roles([UserRoles.doctor])
+  @Post('doctor/appointments/:id/prescription')
+  async updatePrescription(
+    @Param('id') id: string,
+    @Body() body: { prescription: string; recommendations: string },
+    @Res() res: Response,
+  ) {
+    await this.appointmentService.addPrescription(id, body.prescription, body.recommendations);
     return res.redirect('/doctor/appointments');
   }
 
@@ -229,49 +188,67 @@ export class PagesController {
   @Roles([UserRoles.doctor])
   @Get('doctor/schedule')
   async doctorSchedule(@Req() req: Request & { user: any }, @Res() res: Response) {
-    const doctor = await this.doctorModel.findOne({ user_id: req.user.id }).lean();
+    const doctor = await this.pagesService.getDoctorByUserId(req.user.id);
     if (!doctor) return res.redirect('/');
-
-    const schedules = await this.scheduleModel.find({ doctor_id: (doctor as any)._id }).lean();
-    return res.render('pages/doctor/schedule-management', {
-      title: 'Jadval',
-      schedules,
-      user: req.user,
-    });
+    const schedules = await this.pagesService.getDoctorSchedules((doctor as any)._id.toString());
+    const today = new Date().toISOString().split('T')[0];
+    return res.render('pages/doctor/schedule-management', { title: 'Jadval', schedules, today, user: req.user });
   }
 
   @Protected(true)
   @Roles([UserRoles.doctor])
   @Post('doctor/schedule')
   async doctorScheduleCreate(@Req() req: Request & { user: any }, @Body() body: any, @Res() res: Response) {
-    const doctor = await this.doctorModel.findOne({ user_id: req.user.id }).lean();
+    const doctor = await this.pagesService.getDoctorByUserId(req.user.id);
     if (!doctor) return res.redirect('/');
-    await this.scheduleModel.create({
-      doctor_id: (doctor as any)._id,
-      work_day: body.work_day,
+    await this.scheduleService.createBulk((doctor as any)._id.toString(), {
+      type: body.type || 'weekly',
+      start_date: body.start_date,
+      end_date: body.end_date,
+      work_days: Array.isArray(body.work_days) ? body.work_days : [body.work_days].filter(Boolean),
       start_time: body.start_time,
       end_time: body.end_time,
+      break_start: body.break_start || '13:00',
+      break_end: body.break_end || '14:00',
+      slot_duration: parseInt(body.slot_duration) || 30,
+      is_available: true,
+      note: body.note || undefined,
     });
+    return res.redirect('/doctor/schedule');
+  }
+
+  @Protected(true)
+  @Roles([UserRoles.doctor])
+  @Post('doctor/schedule/delete-all')
+  async doctorScheduleDeleteAll(@Req() req: Request & { user: any }, @Res() res: Response) {
+    const doctor = await this.pagesService.getDoctorByUserId(req.user.id);
+    if (doctor) await this.scheduleService.deleteAllByDoctor((doctor as any)._id.toString());
     return res.redirect('/doctor/schedule');
   }
 
   @Protected(true)
   @Roles([UserRoles.doctor])
   @Post('doctor/schedule/:id/delete')
-  async doctorScheduleDelete(@Param('id') id: string, @Res() res: Response) {
-    await this.scheduleModel.findByIdAndDelete(id);
+  async doctorScheduleDelete(@Param('id') id: string, @Req() req: Request & { user: any }, @Res() res: Response) {
+    const doctor = await this.pagesService.getDoctorByUserId(req.user.id);
+    if (doctor) await this.scheduleService.deleteScheduleByDoctor(id, (doctor as any)._id.toString());
     return res.redirect('/doctor/schedule');
   }
 
   @Protected(true)
   @Roles([UserRoles.doctor])
   @Post('doctor/schedule/:id/update')
-  async doctorScheduleUpdate(@Param('id') id: string, @Body() body: any, @Res() res: Response) {
-    await this.scheduleModel.findByIdAndUpdate(id, {
-      work_day: body.work_day,
-      start_time: body.start_time,
-      end_time: body.end_time,
-    });
+  async doctorScheduleUpdate(@Param('id') id: string, @Body() body: any, @Req() req: Request & { user: any }, @Res() res: Response) {
+    const doctor = await this.pagesService.getDoctorByUserId(req.user.id);
+    if (doctor) {
+      await this.scheduleService.update(id, (doctor as any)._id.toString(), {
+        start_time: body.start_time,
+        end_time: body.end_time,
+        break_start: body.break_start,
+        break_end: body.break_end,
+        slot_duration: parseInt(body.slot_duration) || 30,
+      });
+    }
     return res.redirect('/doctor/schedule');
   }
 
@@ -281,28 +258,23 @@ export class PagesController {
   @Roles([UserRoles.admin])
   @Get('admin')
   async adminDashboard(@Req() req: Request & { user: any }, @Res() res: Response) {
-    return res.render('pages/admin/dashboard', { title: 'Admin paneli', user: req.user });
+    const stats = await this.pagesService.getAdminStats();
+    return res.render('pages/admin/dashboard', { title: 'Admin paneli', user: req.user, stats });
   }
 
   @Protected(true)
   @Roles([UserRoles.admin])
   @Get('admin/doctors')
   async adminDoctors(@Req() req: Request & { user: any }, @Res() res: Response) {
-    const doctors = await this.doctorModel.find().populate('user_id').populate('department_id').lean();
-    const departments = await this.departmentModel.find().lean();
-    return res.render('pages/admin/doctors-management', {
-      title: 'Shifokorlar boshqaruvi',
-      doctors,
-      departments,
-      user: req.user,
-    });
+    const [doctors, departments] = await this.pagesService.getAdminDoctors();
+    return res.render('pages/admin/doctors-management', { title: 'Shifokorlar boshqaruvi', doctors, departments, user: req.user });
   }
 
   @Protected(true)
   @Roles([UserRoles.admin])
   @Post('admin/doctors/:id/update')
   async adminUpdateDoctor(@Param('id') id: string, @Body() body: any, @Res() res: Response) {
-    await this.doctorModel.findByIdAndUpdate(id, {
+    await this.pagesService.updateDoctor(id, {
       specialization: body.specialization,
       experience: parseInt(body.experience),
       room_number: body.room_number,
@@ -315,7 +287,7 @@ export class PagesController {
   @Roles([UserRoles.admin])
   @Post('admin/doctors/:id/delete')
   async adminDeleteDoctor(@Param('id') id: string, @Res() res: Response) {
-    await this.doctorModel.findByIdAndDelete(id);
+    await this.pagesService.deleteDoctor(id);
     return res.redirect('/admin/doctors');
   }
 
@@ -323,24 +295,8 @@ export class PagesController {
   @Roles([UserRoles.admin])
   @Get('admin/users')
   async adminUsers(@Req() req: Request & { user: any }, @Res() res: Response) {
-    const users = await this.userModel.find().select('-password').lean();
-    const departments = await this.departmentModel.find().lean();
-    const doctors = await this.doctorModel.find().lean();
-
-    const doctorMap: Record<string, any> = {};
-    for (const d of doctors) doctorMap[d.user_id.toString()] = d;
-
-    const usersWithDoctor = users.map(u => ({
-      ...u,
-      doctorInfo: doctorMap[(u as any)._id.toString()] || null,
-    }));
-
-    return res.render('pages/admin/users-management', {
-      title: 'Foydalanuvchilar boshqaruvi',
-      users: usersWithDoctor,
-      departments,
-      user: req.user,
-    });
+    const { users, departments } = await this.pagesService.getAdminUsers();
+    return res.render('pages/admin/users-management', { title: 'Foydalanuvchilar boshqaruvi', users, departments, user: req.user });
   }
 
   @Protected(true)
@@ -348,30 +304,18 @@ export class PagesController {
   @Post('admin/users/:id/role')
   async adminChangeRole(@Param('id') id: string, @Body() body: any, @Req() req: Request & { user: any }, @Res() res: Response) {
     const newRole = body.role as UserRoles;
-    await this.userModel.findByIdAndUpdate(id, { role: newRole });
-
-    if (newRole === UserRoles.doctor) {
-      await this.doctorModel.findOneAndUpdate(
-        { user_id: id },
-        {
-          user_id: id,
-          department_id: body.department_id,
-          specialization: body.specialization,
-          experience: parseInt(body.experience) || 0,
-          room_number: body.room_number,
-          bio: body.bio || '',
-        },
-        { upsert: true, new: true },
-      );
-    }
-
-    // If admin changed their own role, clear cookies
+    await this.pagesService.changeUserRole(id, newRole, newRole === UserRoles.doctor ? {
+      department_id: body.department_id,
+      specialization: body.specialization,
+      experience: parseInt(body.experience) || 0,
+      room_number: body.room_number,
+      bio: body.bio || '',
+    } : undefined);
     if (req.user.id === id) {
       res.clearCookie('accessToken');
       res.clearCookie('refreshToken');
       return res.redirect('/login');
     }
-
     return res.redirect('/admin/users');
   }
 
@@ -379,19 +323,15 @@ export class PagesController {
   @Roles([UserRoles.admin])
   @Get('admin/departments')
   async adminDepartments(@Req() req: Request & { user: any }, @Res() res: Response) {
-    const departments = await this.departmentModel.find().lean();
-    return res.render('pages/admin/departments-management', {
-      title: 'Bo\'limlar boshqaruvi',
-      departments,
-      user: req.user,
-    });
+    const departments = await this.pagesService.getDepartments();
+    return res.render('pages/admin/departments-management', { title: 'Bo\'limlar boshqaruvi', departments, user: req.user });
   }
 
   @Protected(true)
   @Roles([UserRoles.admin])
   @Post('admin/departments')
   async adminCreateDepartment(@Body('name') name: string, @Res() res: Response) {
-    await this.departmentModel.create({ name });
+    await this.pagesService.createDepartment(name);
     return res.redirect('/admin/departments');
   }
 
@@ -399,7 +339,7 @@ export class PagesController {
   @Roles([UserRoles.admin])
   @Post('admin/departments/:id/update')
   async adminUpdateDepartment(@Param('id') id: string, @Body('name') name: string, @Res() res: Response) {
-    await this.departmentModel.findByIdAndUpdate(id, { name });
+    await this.pagesService.updateDepartment(id, name);
     return res.redirect('/admin/departments');
   }
 
@@ -407,7 +347,7 @@ export class PagesController {
   @Roles([UserRoles.admin])
   @Post('admin/departments/:id/delete')
   async adminDeleteDepartment(@Param('id') id: string, @Res() res: Response) {
-    await this.departmentModel.findByIdAndDelete(id);
+    await this.pagesService.deleteDepartment(id);
     return res.redirect('/admin/departments');
   }
 
@@ -415,60 +355,19 @@ export class PagesController {
   @Roles([UserRoles.admin])
   @Get('admin/add-doctor')
   async adminAddDoctorPage(@Req() req: Request & { user: any }, @Res() res: Response) {
-    const departments = await this.departmentModel.find().lean();
-    return res.render('pages/admin/add-doctor', {
-      title: 'Yangi shifokor qo\'shish',
-      departments,
-      user: req.user,
-    });
+    const departments = await this.pagesService.getDepartments();
+    return res.render('pages/admin/add-doctor', { title: 'Yangi shifokor qo\'shish', departments, user: req.user });
   }
 
   @Protected(true)
   @Roles([UserRoles.admin])
   @Post('admin/add-doctor')
   async adminAddDoctor(@Body() body: any, @Req() req: Request & { user: any }, @Res() res: Response) {
-    try {
-      // Check if user already exists
-      const existingUser = await this.userModel.findOne({ email: body.email });
-      if (existingUser) {
-        const departments = await this.departmentModel.find().lean();
-        return res.render('pages/admin/add-doctor', {
-          title: 'Yangi shifokor qo\'shish',
-          departments,
-          user: req.user,
-          error: 'Bu email allaqachon ro\'yxatdan o\'tgan',
-        });
-      }
-
-      // Create user
-      const hashedPassword = await bcrypt.hash(body.password, 10);
-      const newUser = await this.userModel.create({
-        full_name: body.full_name,
-        email: body.email,
-        password: hashedPassword,
-        role: UserRoles.doctor,
-        is_active: true,
-      });
-
-      // Create doctor
-      await this.doctorModel.create({
-        user_id: newUser._id,
-        department_id: body.department_id,
-        specialization: body.specialization,
-        experience: parseInt(body.experience),
-        room_number: body.room_number,
-        bio: body.bio || '',
-      });
-
-      return res.redirect('/admin/doctors');
-    } catch (error) {
-      const departments = await this.departmentModel.find().lean();
-      return res.render('pages/admin/add-doctor', {
-        title: 'Yangi shifokor qo\'shish',
-        departments,
-        user: req.user,
-        error: 'Xatolik yuz berdi. Iltimos qaytadan urinib ko\'ring.',
-      });
+    const { error } = await this.pagesService.addDoctor(body);
+    if (error) {
+      const departments = await this.pagesService.getDepartments();
+      return res.render('pages/admin/add-doctor', { title: 'Yangi shifokor qo\'shish', departments, user: req.user, error });
     }
+    return res.redirect('/admin/doctors');
   }
 }

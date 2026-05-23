@@ -1,37 +1,75 @@
-<div class="hero bg-light p-5 rounded">
-  <h1 class="display-4">Smart Clinic'ga xush kelibsiz!</h1>
-  <p class="lead">Onlayn shifokor qabuliga yoziling va sog'ligingizni saqlang.</p>
-  <hr class="my-4">
-  <p>Bizning tizimimiz orqali siz osongina shifokorga yozilishingiz mumkin.</p>
-  <a class="btn btn-primary btn-lg" href="/doctors" role="button">Shifokorlarni ko'rish</a>
-  {{#unless user}}
-    <a class="btn btn-outline-primary btn-lg" href="/register" role="button">Ro'yxatdan o'tish</a>
-  {{/unless}}
+<!-- Hero -->
+<div class="hero-banner sc-fade">
+  <div class="row align-items-center">
+    <div class="col-lg-8">
+      <h1 class="hero-title animate-slide-up">
+        <i class="fas fa-heartbeat me-3"></i>Smart Clinic
+      </h1>
+      <p class="hero-subtitle animate-slide-up" style="animation-delay:.2s;">Onlayn shifokor qabuliga yoziling va sog'ligingizni saqlang</p>
+      <div class="d-flex gap-3 flex-wrap animate-slide-up" style="animation-delay:.4s;">
+        <a class="btn-hero-primary" href="/doctors">
+          <i class="fas fa-user-md me-2"></i>Shifokorlarni ko'rish
+        </a>
+        {{#unless user}}
+          <a class="btn-hero-outline" href="/register">
+            <i class="fas fa-user-plus me-2"></i>Ro'yxatdan o'tish
+          </a>
+        {{/unless}}
+      </div>
+    </div>
+    <div class="col-lg-4 text-center d-none d-lg-block animate-float">
+      <i class="fas fa-hospital" style="font-size:9rem;color:rgba(255,255,255,.2);"></i>
+    </div>
+  </div>
 </div>
 
-<div class="row mt-5">
-  <div class="col-md-4">
-    <div class="card">
-      <div class="card-body text-center">
-        <h5 class="card-title">Oson qabulga yozilish</h5>
-        <p class="card-text">Bir necha bosish bilan shifokorga yoziling</p>
-      </div>
+<!-- Services -->
+<div class="row g-4 mb-5">
+  <div class="col-md-4 sc-slide" style="animation-delay:.1s;">
+    <div class="sc-card service-card text-center p-4">
+      <div class="service-icon purple mx-auto mb-3"><i class="fas fa-calendar-check"></i></div>
+      <h5 class="fw-bold mb-2">Oson qabulga yozilish</h5>
+      <p class="text-muted small mb-0">Bir necha bosish bilan shifokorga yoziling va vaqtingizni tejang</p>
     </div>
   </div>
-  <div class="col-md-4">
-    <div class="card">
-      <div class="card-body text-center">
-        <h5 class="card-title">Malakali shifokorlar</h5>
-        <p class="card-text">Tajribali mutaxassislar xizmatingizda</p>
-      </div>
+  <div class="col-md-4 sc-slide" style="animation-delay:.2s;">
+    <div class="sc-card service-card text-center p-4">
+      <div class="service-icon green mx-auto mb-3"><i class="fas fa-user-md"></i></div>
+      <h5 class="fw-bold mb-2">Malakali shifokorlar</h5>
+      <p class="text-muted small mb-0">Tajribali mutaxassislar xizmatingizda har kuni</p>
     </div>
   </div>
-  <div class="col-md-4">
-    <div class="card">
-      <div class="card-body text-center">
-        <h5 class="card-title">Onlayn boshqaruv</h5>
-        <p class="card-text">Qabullaringizni onlayn kuzatib boring</p>
-      </div>
+  <div class="col-md-4 sc-slide" style="animation-delay:.3s;">
+    <div class="sc-card service-card text-center p-4">
+      <div class="service-icon blue mx-auto mb-3"><i class="fas fa-laptop-medical"></i></div>
+      <h5 class="fw-bold mb-2">Onlayn boshqaruv</h5>
+      <p class="text-muted small mb-0">Qabullaringizni onlayn kuzatib boring va retseptlarni ko'ring</p>
+    </div>
+  </div>
+</div>
+
+<!-- Info -->
+<div class="row g-4 sc-fade" style="animation-delay:.5s;">
+  <div class="col-lg-6">
+    <div class="sc-card h-100">
+      <h5 class="fw-bold mb-3"><i class="fas fa-info-circle text-primary me-2"></i>Bizning afzalliklarimiz</h5>
+      <ul class="list-unstyled mb-0">
+        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>24/7 onlayn qo'llab-quvvatlash</li>
+        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Telegram bot orqali boshqarish</li>
+        <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Elektron retseptlar</li>
+        <li class="mb-0"><i class="fas fa-check-circle text-success me-2"></i>Qabullar tarixi</li>
+      </ul>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="sc-card h-100">
+      <h5 class="fw-bold mb-3"><i class="fas fa-question-circle text-info me-2"></i>Qanday ishlaydi?</h5>
+      <ol class="list-unstyled mb-0">
+        <li class="mb-2"><span class="step-num">1</span>Ro'yxatdan o'ting</li>
+        <li class="mb-2"><span class="step-num">2</span>Shifokorni tanlang</li>
+        <li class="mb-2"><span class="step-num">3</span>Qulay vaqtni belgilang</li>
+        <li class="mb-0"><span class="step-num">4</span>Qabulga tashrif buyuring</li>
+      </ol>
     </div>
   </div>
 </div>

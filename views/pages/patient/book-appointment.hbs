@@ -1,70 +1,95 @@
-<h1 class="mb-4">Qabulga yozilish</h1>
+<div class="page-header sc-fade">
+  <div class="page-header-left">
+    <div class="page-header-icon green"><i class="fas fa-calendar-plus"></i></div>
+    <div>
+      <h2>Qabulga yozilish</h2>
+      <p>Qulay vaqtni tanlang va qabulga yoziling</p>
+    </div>
+  </div>
+</div>
 
-<div class="row">
-  <div class="col-md-5">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Shifokor ma'lumotlari</h5>
+<div class="row g-4 sc-slide">
+  <!-- Doctor Info -->
+  <div class="col-md-4">
+    <div class="sc-card text-center doctor-info-card">
+      <div class="doc-photo-wrap mb-3">
         {{#if doctor.user_id.profile}}
           <img src="/uploads/user-profile/{{doctor.user_id.profile}}"
-            class="rounded-circle border mb-2"
-            width="64" height="64" style="object-fit:cover;">
+            class="doc-photo" alt="{{doctor.user_id.full_name}}">
+        {{else}}
+          <div class="doc-photo-placeholder">
+            <i class="fas fa-user-md"></i>
+          </div>
         {{/if}}
-        <p><strong>Ism:</strong> {{doctor.user_id.full_name}}</p>
-        <p><strong>Mutaxassislik:</strong> {{doctor.specialization}}</p>
-        <p><strong>Tajriba:</strong> {{doctor.experience}} yil</p>
-        <p><strong>Xona:</strong> {{doctor.room_number}}</p>
-        {{#if doctor.bio}}<p><strong>Bio:</strong> {{doctor.bio}}</p>{{/if}}
       </div>
+      <h5 class="fw-bold mb-1">{{doctor.user_id.full_name}}</h5>
+      <p class="spec-tag mb-3">{{doctor.specialization}}</p>
+      <div class="doc-stats">
+        <div class="doc-stat">
+          <i class="fas fa-award"></i>
+          <span>{{doctor.experience}} yil</span>
+        </div>
+        <div class="doc-stat">
+          <i class="fas fa-door-open"></i>
+          <span>Xona {{doctor.room_number}}</span>
+        </div>
+      </div>
+      {{#if doctor.bio}}
+        <p class="text-muted small mt-3 mb-0" style="line-height:1.5;">{{doctor.bio}}</p>
+      {{/if}}
     </div>
   </div>
 
-  <div class="col-md-7">
+  <!-- Booking -->
+  <div class="col-md-8">
     {{#if schedules.length}}
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Ish jadvali va qabul vaqtini tanlang</h5>
+      <div class="sc-card booking-card">
+        <h6 class="fw-bold mb-4" style="color:#334155;">
+          <i class="fas fa-clock me-2 text-success"></i>Ish kunlari va vaqtni tanlang
+        </h6>
 
-          <div class="mb-3">
-            <label class="form-label">Ish kunlari</label>
-            <div class="d-flex flex-wrap gap-2" id="dayBtns">
-              {{#each schedules}}
-                <button type="button"
-                  class="btn btn-outline-primary day-btn"
-                  data-day="{{this.work_day}}"
-                  data-start="{{this.start_time}}"
-                  data-end="{{this.end_time}}">
-                  {{this.work_day}} ({{this.start_time}}–{{this.end_time}})
-                </button>
-              {{/each}}
-            </div>
+        <!-- Day Buttons -->
+        <div class="mf-field">
+          <label class="mf-label"><i class="fas fa-calendar-week" style="color:#10b981;"></i> Ish kuni</label>
+          <div class="day-grid" id="dayBtns" role="group" aria-label="Ish kunlarini tanlang">
+            {{#each schedules}}
+              <button type="button" class="day-btn" data-day="{{this.work_day}}"
+                data-start="{{this.start_time}}" data-end="{{this.end_time}}">
+                <span class="day-name">{{#if (eq this.work_day "monday")}}Dushanba{{else if (eq this.work_day "tuesday")}}Seshanba{{else if (eq this.work_day "wednesday")}}Chorshanba{{else if (eq this.work_day "thursday")}}Payshanba{{else if (eq this.work_day "friday")}}Juma{{else if (eq this.work_day "saturday")}}Shanba{{else}}Yakshanba{{/if}}</span>
+                <small class="day-time">{{this.start_time}}–{{this.end_time}}</small>
+              </button>
+            {{/each}}
           </div>
+        </div>
 
-          <div class="mb-3" id="dateSection" style="display:none;">
-            <label class="form-label">Sana tanlang</label>
-            <input type="date" class="form-control" id="appointment_date">
-            <div class="form-text" id="dateHint"></div>
+        <!-- Date -->
+        <div class="mf-field" id="dateSection" style="display:none;">
+          <label class="mf-label"><i class="fas fa-calendar" style="color:#10b981;"></i> Sana tanlang</label>
+          <input type="date" class="mf-input" id="appointment_date">
+          <p class="mf-hint" id="dateHint"></p>
+        </div>
+
+        <!-- Time Slots -->
+        <div id="timeSection" style="display:none;">
+          <div class="mf-field">
+            <label class="mf-label"><i class="fas fa-clock" style="color:#10b981;"></i> Vaqt tanlang</label>
+            <div class="slot-grid" id="slotGrid" role="group" aria-label="Mavjud vaqt slotlari"></div>
+            <p class="mf-hint" id="timeHint"></p>
           </div>
-
-          <div class="mb-3" id="timeSection" style="display:none;">
-            <label class="form-label">Vaqt tanlang (20 minutlik slotlar)</label>
-            <select class="form-select" id="appointment_time" required>
-              <option value="">Vaqtni tanlang</option>
-            </select>
-            <div class="form-text" id="timeHint"></div>
-          </div>
-
-          <button class="btn btn-primary w-100" id="submitBtn" style="display:none;">
-            Qabulga yozilish
+          <button class="btn-book-now w-100" id="submitBtn" style="display:none;">
+            <i class="fas fa-calendar-check me-2"></i>Qabulga yozilish
           </button>
         </div>
       </div>
     {{else}}
-      <div class="alert alert-warning">
-        <i class="fas fa-calendar-times me-2"></i>
-        Bu shifokor hozircha ish jadvalini kiritmagan. Qabul qilish mumkin emas.
+      <div class="sc-card text-center py-5">
+        <i class="fas fa-calendar-times fa-3x text-muted mb-3 d-block"></i>
+        <h5 class="text-muted mb-2">Jadval kiritilmagan</h5>
+        <p class="text-muted mb-4">Bu shifokor hozircha ish jadvalini kiritmagan</p>
+        <a href="/doctors" class="btn-back-link">
+          <i class="fas fa-arrow-left me-2"></i>Boshqa shifokorlar
+        </a>
       </div>
-      <a href="/doctors" class="btn btn-outline-secondary">Boshqa shifokorlar</a>
     {{/if}}
   </div>
 </div>
@@ -73,146 +98,99 @@
 const doctorId = '{{doctor._id}}';
 const schedules = [
   {{#each schedules}}
-  { day: '{{this.work_day}}', start: '{{this.start_time}}', end: '{{this.end_time}}', break_start: '{{this.break_start}}', break_end: '{{this.break_end}}' },
+  { day: '{{this.work_day}}', start: '{{this.start_time}}', end: '{{this.end_time}}', break_start: '{{this.break_start}}', break_end: '{{this.break_end}}', slot_duration: {{#if this.slot_duration}}{{this.slot_duration}}{{else}}30{{/if}} },
   {{/each}}
 ];
-
-const dayMap = {
-  monday: 1, tuesday: 2, wednesday: 3,
-  thursday: 4, friday: 5, saturday: 6, sunday: 0
-};
-
-let selectedDay = null;
+const dayMap = { monday:1, tuesday:2, wednesday:3, thursday:4, friday:5, saturday:6, sunday:0 };
+let selectedDay = null, selectedTime = null;
 
 document.querySelectorAll('.day-btn').forEach(btn => {
   btn.addEventListener('click', async () => {
-    document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active', 'btn-primary'));
-    btn.classList.add('active', 'btn-primary');
-    btn.classList.remove('btn-outline-primary');
-
+    document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
     selectedDay = btn.dataset.day;
-    const start = btn.dataset.start;
-    const end = btn.dataset.end;
+    selectedTime = null;
 
-    // Find next available date for this weekday
     const targetDow = dayMap[selectedDay];
-    const today = new Date();
+    const today = new Date(); today.setHours(0,0,0,0);
     let d = new Date(today);
-    d.setHours(0,0,0,0);
     for (let i = 0; i < 7; i++) {
-      if (d.getDay() === targetDow && d >= today) break;
+      if (d.getDay() === targetDow) break;
       d.setDate(d.getDate() + 1);
     }
-
-    const dateInput = document.getElementById('appointment_date');
     const minDate = d.toISOString().split('T')[0];
+    const dateInput = document.getElementById('appointment_date');
     dateInput.value = minDate;
     dateInput.min = minDate;
+    document.getElementById('dateHint').textContent = `Ish vaqti: ${btn.dataset.start} – ${btn.dataset.end}`;
+    document.getElementById('dateSection').style.display = 'block';
 
-    // Only allow selecting the correct weekday
     dateInput.onchange = async () => {
       const chosen = new Date(dateInput.value + 'T00:00:00');
       if (chosen.getDay() !== targetDow) {
         document.getElementById('dateHint').textContent = `Faqat ${selectedDay} kunlari tanlansin`;
         dateInput.value = minDate;
       } else {
-        document.getElementById('dateHint').textContent = '';
-        await loadTimeSlots(dateInput.value, start, end);
+        await loadSlots(dateInput.value);
       }
     };
-
-    document.getElementById('dateHint').textContent = `Ish vaqti: ${start} – ${end}`;
-    document.getElementById('dateSection').style.display = 'block';
-    
-    // Load time slots for selected date
-    await loadTimeSlots(minDate, start, end);
+    await loadSlots(minDate);
   });
 });
 
-async function loadTimeSlots(date, startTime, endTime) {
-  const timeSelect = document.getElementById('appointment_time');
-  timeSelect.innerHTML = '<option value="">Yuklanmoqda...</option>';
-  
+async function loadSlots(date) {
+  const grid = document.getElementById('slotGrid');
+  grid.innerHTML = '<span class="text-muted small">Yuklanmoqda...</span>';
+  document.getElementById('timeSection').style.display = 'block';
+  document.getElementById('submitBtn').style.display = 'none';
+  selectedTime = null;
+
+  const sched = schedules.find(s => s.day === selectedDay);
+  let booked = [];
   try {
-    // Get booked appointments for this date
     const res = await fetch(`/api/appointment/available-slots?doctor_id=${doctorId}&date=${date}`);
-    const bookedSlots = res.ok ? (await res.json()).data || [] : [];
-    
-    // Get break time from current schedule
-    const currentSchedule = schedules.find(s => s.day === selectedDay);
-    const breakStart = currentSchedule?.break_start;
-    const breakEnd = currentSchedule?.break_end;
-    
-    // Generate 20-minute slots
-    const slots = generateTimeSlots(startTime, endTime, bookedSlots, breakStart, breakEnd);
-    
-    timeSelect.innerHTML = '<option value="">Vaqtni tanlang</option>';
-    slots.forEach(slot => {
-      const option = document.createElement('option');
-      option.value = slot.time;
-      option.textContent = `${slot.time} - ${slot.endTime}${slot.booked ? ' (Band)' : ''}${slot.isBreak ? ' (Dam olish)' : ''}`;
-      option.disabled = slot.booked || slot.isBreak;
-      timeSelect.appendChild(option);
-    });
-    
-    document.getElementById('timeSection').style.display = 'block';
-    document.getElementById('submitBtn').style.display = 'block';
-    const availableCount = slots.filter(s => !s.booked && !s.isBreak).length;
-    document.getElementById('timeHint').textContent = availableCount + ' ta bo\'sh slot mavjud';
-  } catch (error) {
-    timeSelect.innerHTML = '<option value="">Xatolik yuz berdi</option>';
-  }
+    if (res.ok) booked = (await res.json()).data || [];
+  } catch {}
+
+  const slots = genSlots(sched.start, sched.end, booked, sched.break_start, sched.break_end, sched.slot_duration || 30);
+  grid.innerHTML = '';
+  slots.forEach(s => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'slot-btn';
+    btn.textContent = s.time;
+    btn.disabled = s.booked || s.isBreak;
+    if (!btn.disabled) {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedTime = s.time;
+        document.getElementById('submitBtn').style.display = 'flex';
+      });
+    }
+    grid.appendChild(btn);
+  });
+  const free = slots.filter(s => !s.booked && !s.isBreak).length;
+  document.getElementById('timeHint').textContent = `${free} ta bo'sh slot mavjud`;
 }
 
-function generateTimeSlots(start, end, bookedSlots, breakStart, breakEnd) {
+function genSlots(start, end, booked, brkS, brkE, slotDuration) {
   const slots = [];
-  const [startH, startM] = start.split(':').map(Number);
-  const [endH, endM] = end.split(':').map(Number);
-  
-  let currentH = startH;
-  let currentM = startM;
-  
-  while (currentH < endH || (currentH === endH && currentM < endM)) {
-    const time = `${String(currentH).padStart(2, '0')}:${String(currentM).padStart(2, '0')}`;
-    
-    // Calculate end time (20 minutes later)
-    let endSlotM = currentM + 20;
-    let endSlotH = currentH;
-    if (endSlotM >= 60) {
-      endSlotM -= 60;
-      endSlotH += 1;
-    }
-    const endTime = `${String(endSlotH).padStart(2, '0')}:${String(endSlotM).padStart(2, '0')}`;
-    
-    // Check if booked
-    const booked = bookedSlots.includes(time);
-    
-    // Check if in break time
-    let isBreak = false;
-    if (breakStart && breakEnd) {
-      isBreak = time >= breakStart && time < breakEnd;
-    }
-    
-    slots.push({ time, endTime, booked, isBreak });
-    
-    // Move to next slot
-    currentM += 20;
-    if (currentM >= 60) {
-      currentM -= 60;
-      currentH += 1;
-    }
+  let [h, m] = start.split(':').map(Number);
+  const [eh, em] = end.split(':').map(Number);
+  while (h < eh || (h === eh && m < em)) {
+    const time = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    const isBreak = brkS && brkE ? time >= brkS && time < brkE : h === 13;
+    slots.push({ time, booked: booked.includes(time), isBreak });
+    m += slotDuration; if (m >= 60) { h += Math.floor(m / 60); m = m % 60; }
   }
-  
   return slots;
 }
 
 document.getElementById('submitBtn')?.addEventListener('click', async () => {
   const date = document.getElementById('appointment_date').value;
-  const time = document.getElementById('appointment_time').value;
-  if (!date || !time) return Toast.error('Sana va vaqtni tanlang');
-
-  const appointment_date = new Date(`${date}T${time}:00`).toISOString();
-
+  if (!date || !selectedTime) return Toast.error('Sana va vaqtni tanlang');
+  const appointment_date = new Date(`${date}T${selectedTime}:00`).toISOString();
   try {
     const res = await fetch('/api/appointment', {
       method: 'POST',
@@ -226,8 +204,6 @@ document.getElementById('submitBtn')?.addEventListener('click', async () => {
     } else {
       Toast.error(data.message || 'Xatolik yuz berdi');
     }
-  } catch {
-    Toast.error('Tarmoq xatosi');
-  }
+  } catch { Toast.error('Tarmoq xatosi'); }
 });
 </script>

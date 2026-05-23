@@ -1,68 +1,113 @@
-<h1 class="mb-4">Yangi shifokor qo'shish</h1>
+<div class="page-header sc-fade">
+  <div class="page-header-left">
+    <div class="page-header-icon green"><i class="fas fa-user-plus"></i></div>
+    <div>
+      <h2>Yangi shifokor qo'shish</h2>
+      <p>Yangi shifokor ma'lumotlarini kiriting</p>
+    </div>
+  </div>
+  <a href="/admin/doctors" class="btn-back">
+    <i class="fas fa-arrow-left me-2"></i>Orqaga
+  </a>
+</div>
 
-<div class="card">
-  <div class="card-body">
+{{#if error}}
+  <div class="alert alert-danger alert-dismissible fade show sc-slide mb-4" role="alert">
+    <i class="fas fa-exclamation-circle me-2"></i>{{error}}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+{{/if}}
+
+<div class="row justify-content-center sc-slide">
+  <div class="col-lg-8">
     <form action="/admin/add-doctor" method="POST">
-      <h5 class="card-title mb-3">Foydalanuvchi ma'lumotlari</h5>
-      
-      <div class="mb-3">
-        <label for="full_name" class="form-label">To'liq ism *</label>
-        <input type="text" class="form-control" id="full_name" name="full_name" required>
+      <!-- User Info -->
+      <div class="form-section mb-4">
+        <div class="form-section-header">
+          <div class="form-section-icon purple"><i class="fas fa-user"></i></div>
+          <span>Foydalanuvchi ma'lumotlari</span>
+        </div>
+        <div class="form-section-body">
+          <div class="mf-field">
+            <label class="mf-label"><i class="fas fa-user" style="color:#667eea;"></i> To'liq ism *</label>
+            <input type="text" class="mf-input" name="full_name" placeholder="Masalan: Aliyev Vali Akramovich" required>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="mf-field mb-0">
+                <label class="mf-label"><i class="fas fa-envelope" style="color:#667eea;"></i> Email *</label>
+                <input type="email" class="mf-input" name="email" placeholder="doctor@example.com" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mf-field mb-0">
+                <label class="mf-label"><i class="fas fa-lock" style="color:#667eea;"></i> Parol *</label>
+                <input type="password" class="mf-input" name="password" required minlength="6" placeholder="••••••••">
+                <p class="mf-hint">Kamida 6 ta belgi</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="mb-3">
-        <label for="email" class="form-label">Email *</label>
-        <input type="email" class="form-control" id="email" name="email" required>
+      <!-- Doctor Info -->
+      <div class="form-section mb-4">
+        <div class="form-section-header">
+          <div class="form-section-icon green"><i class="fas fa-stethoscope"></i></div>
+          <span>Shifokor ma'lumotlari</span>
+        </div>
+        <div class="form-section-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="mf-field">
+                <label class="mf-label"><i class="fas fa-building" style="color:#10b981;"></i> Bo'lim *</label>
+                <div class="mf-select-wrap">
+                  <select class="mf-select mf-input" name="department_id" required>
+                    <option value="">Bo'limni tanlang</option>
+                    {{#each departments}}
+                      <option value="{{this._id}}">{{this.name}}</option>
+                    {{/each}}
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mf-field">
+                <label class="mf-label"><i class="fas fa-user-md" style="color:#10b981;"></i> Mutaxassislik *</label>
+                <input type="text" class="mf-input" name="specialization" placeholder="Masalan: Kardiolog" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mf-field">
+                <label class="mf-label"><i class="fas fa-award" style="color:#10b981;"></i> Tajriba (yil) *</label>
+                <input type="number" class="mf-input" name="experience" min="0" placeholder="0" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mf-field">
+                <label class="mf-label"><i class="fas fa-door-open" style="color:#10b981;"></i> Xona raqami *</label>
+                <input type="text" class="mf-input" name="room_number" placeholder="Masalan: 101" required>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="mf-field mb-0">
+                <label class="mf-label"><i class="fas fa-file-alt" style="color:#10b981;"></i> Biografiya</label>
+                <textarea class="mf-input mf-textarea" name="bio" rows="3" placeholder="Shifokor haqida qisqacha ma'lumot..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="mb-3">
-        <label for="password" class="form-label">Parol *</label>
-        <input type="password" class="form-control" id="password" name="password" required minlength="6">
-        <div class="form-text">Kamida 6 ta belgi</div>
-      </div>
-
-      <hr class="my-4">
-
-      <h5 class="card-title mb-3">Shifokor ma'lumotlari</h5>
-
-      <div class="mb-3">
-        <label for="department_id" class="form-label">Bo'lim *</label>
-        <select class="form-select" id="department_id" name="department_id" required>
-          <option value="">Bo'limni tanlang</option>
-          {{#each departments}}
-            <option value="{{this._id}}">{{this.name}}</option>
-          {{/each}}
-        </select>
-      </div>
-
-      <div class="mb-3">
-        <label for="specialization" class="form-label">Mutaxassislik *</label>
-        <input type="text" class="form-control" id="specialization" name="specialization" required>
-      </div>
-
-      <div class="mb-3">
-        <label for="experience" class="form-label">Tajriba (yil) *</label>
-        <input type="number" class="form-control" id="experience" name="experience" required min="0">
-      </div>
-
-      <div class="mb-3">
-        <label for="room_number" class="form-label">Xona raqami *</label>
-        <input type="text" class="form-control" id="room_number" name="room_number" required>
-      </div>
-
-      <div class="mb-3">
-        <label for="bio" class="form-label">Biografiya</label>
-        <textarea class="form-control" id="bio" name="bio" rows="3"></textarea>
-      </div>
-
-      <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-primary">Qo'shish</button>
-        <a href="/admin/doctors" class="btn btn-secondary">Bekor qilish</a>
+      <div class="d-flex gap-3 justify-content-end">
+        <a href="/admin/doctors" class="btn-back">
+          <i class="fas fa-times me-2"></i>Bekor qilish
+        </a>
+        <button type="submit" class="btn-submit">
+          <i class="fas fa-check me-2"></i>Qo'shish
+        </button>
       </div>
     </form>
   </div>
 </div>
 
-{{#if error}}
-  <div class="alert alert-danger mt-3">{{error}}</div>
-{{/if}}

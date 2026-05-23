@@ -1,49 +1,110 @@
-<h1 class="mb-4">Qabullar ro'yxati</h1>
+<div class="page-header sc-fade">
+  <div class="page-header-left">
+    <div class="page-header-icon blue"><i class="fas fa-clipboard-list"></i></div>
+    <div>
+      <h2>Qabullar ro'yxati</h2>
+      <p>Bemorlar qabullari va ularni boshqarish</p>
+    </div>
+  </div>
+  {{#if appointments.length}}
+    <span class="count-badge blue">{{appointments.length}} ta</span>
+  {{/if}}
+</div>
 
 {{#if appointments.length}}
-  <div class="table-responsive">
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Bemor</th>
-          <th>Sana</th>
-          <th>Vaqt</th>
-          <th>Holat</th>
-          <th>Amallar</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{#each appointments}}
-          <tr>
-            <td>{{this.patient_id.full_name}}</td>
-            <td>{{formatDate this.appointment_date}}</td>
-            <td>{{#if this.appointment_time}}{{this.appointment_time}}{{else}}-{{/if}}</td>
-            <td>
-              {{#if (eq this.status 'pending')}}
-                <span class="badge bg-warning">Kutilmoqda</span>
-              {{else if (eq this.status 'confirmed')}}
-                <span class="badge bg-success">Tasdiqlangan</span>
-              {{else if (eq this.status 'cancelled')}}
-                <span class="badge bg-danger">Bekor qilingan</span>
-              {{else}}
-                <span class="badge bg-secondary">{{this.status}}</span>
-              {{/if}}
-            </td>
-            <td>
-              {{#if (eq this.status 'pending')}}
-                <form action="/doctor/appointments/{{this._id}}/confirm" method="POST" style="display:inline;">
-                  <button type="submit" class="btn btn-sm btn-success">Tasdiqlash</button>
-                </form>
-                <form action="/doctor/appointments/{{this._id}}/cancel" method="POST" style="display:inline;">
-                  <button type="submit" class="btn btn-sm btn-danger">Rad etish</button>
-                </form>
-              {{/if}}
-            </td>
-          </tr>
-        {{/each}}
-      </tbody>
-    </table>
+  <div class="row g-4">
+    {{#each appointments}}
+      <div class="col-lg-6 sc-slide" style="animation-delay:{{multiply @index 0.05}}s;">
+        <div class="sc-card">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="d-flex align-items-center gap-3">
+              <div class="appt-avatar">
+                <i class="fas fa-user"></i>
+              </div>
+              <div>
+                <h6 class="mb-0 fw-bold">{{this.patient_id.full_name}}</h6>
+                <small class="text-muted">
+                  <i class="fas fa-calendar me-1"></i>{{formatDate this.appointment_date}}
+                  {{#if this.appointment_time}}<i class="fas fa-clock ms-2 me-1"></i>{{this.appointment_time}}{{/if}}
+                </small>
+              </div>
+            </div>
+            <span class="appt-status
+              {{#if (eq this.status 'pending')}}pending
+              {{else if (eq this.status 'confirmed')}}confirmed
+              {{else if (eq this.status 'cancelled')}}cancelled
+              {{else}}done{{/if}}">
+              {{#if (eq this.status 'pending')}}Kutilmoqda
+              {{else if (eq this.status 'confirmed')}}Tasdiqlangan
+              {{else if (eq this.status 'cancelled')}}Rad etilgan
+              {{else}}Yakunlangan{{/if}}
+            </span>
+          </div>
+
+          <div class="d-flex gap-2">
+            {{#if (eq this.status 'pending')}}
+              <form action="/doctor/appointments/{{this._id}}/confirm" method="POST" class="flex-fill">
+                <button type="submit" class="btn-action green w-100">
+                  <i class="fas fa-check me-1"></i>Tasdiqlash
+                </button>
+              </form>
+              <form action="/doctor/appointments/{{this._id}}/cancel" method="POST" class="flex-fill" aria-label="Qabulni rad etish" onsubmit="return confirm('Rad etishni tasdiqlaysizmi?')">
+                <button type="submit" class="btn-action red w-100">
+                  <i class="fas fa-times me-1"></i>Rad etish
+                </button>
+              </form>
+            {{/if}}
+            {{#if (eq this.status 'confirmed')}}
+              <button type="button" class="btn-action blue flex-fill" data-bs-toggle="modal" data-bs-target="#prescriptionModal{{this._id}}">
+                <i class="fas fa-file-medical me-1"></i>Retsept yozish
+              </button>
+            {{/if}}
+          </div>
+        </div>
+      </div>
+    {{/each}}
   </div>
+
+  {{#each appointments}}
+    {{#if (eq this.status 'confirmed')}}
+      <div class="modal fade" id="prescriptionModal{{this._id}}" tabindex="-1" aria-labelledby="prescriptionModalLabel{{this._id}}" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="mm-modal modal-content">
+            <div class="mm-header blue">
+              <div class="d-flex align-items-center gap-3">
+                <div class="mm-header-icon"><i class="fas fa-file-medical"></i></div>
+                <div>
+                  <h6 class="mb-0 fw-bold">Retsept yozish</h6>
+                  <small class="opacity-75">{{this.patient_id.full_name}}</small>
+                </div>
+              </div>
+              <button type="button" class="mm-close" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
+            </div>
+            <form action="/doctor/appointments/{{this._id}}/prescription" method="POST">
+              <div class="mm-body">
+                <div class="mf-field">
+                  <label class="mf-label"><i class="fas fa-pills" style="color:#3b82f6;"></i> Dorilar ro'yxati</label>
+                  <textarea class="mf-textarea mf-input" name="prescription" rows="5" placeholder="Dorilar va dozalarini kiriting...">{{this.prescription}}</textarea>
+                </div>
+                <div class="mf-field mb-0">
+                  <label class="mf-label"><i class="fas fa-clipboard-list" style="color:#3b82f6;"></i> Maslahatlar</label>
+                  <textarea class="mf-textarea mf-input" name="recommendations" rows="5" placeholder="Bemorga maslahatlar...">{{this.recommendations}}</textarea>
+                </div>
+              </div>
+              <div class="mm-footer">
+                <button type="button" class="mm-btn-cancel" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>Yopish</button>
+                <button type="submit" class="mm-btn-save blue"><i class="fas fa-save me-1"></i>Saqlash</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    {{/if}}
+  {{/each}}
 {{else}}
-  <div class="alert alert-info">Hozircha qabullar yo'q.</div>
+  <div class="text-center py-5 sc-fade">
+    <i class="fas fa-clipboard fa-4x text-muted mb-3 d-block"></i>
+    <h5 class="text-muted">Hozircha qabullar yo'q</h5>
+  </div>
 {{/if}}
+

@@ -37,6 +37,12 @@ export class AppointmentController {
   @Get('available-slots')
   async getAvailableSlots(@Req() req: Request) {
     const { doctor_id, date } = req.query;
+    return this.service.getAvailableSlots(doctor_id as string, date as string);
+  }
+
+  @Get('booked-slots')
+  async getBookedSlots(@Req() req: Request) {
+    const { doctor_id, date } = req.query;
     return this.service.getBookedSlots(doctor_id as string, date as string);
   }
 
@@ -55,10 +61,8 @@ export class AppointmentController {
     @Req() req: Request & { user: any },
   ) {
     try {
-      console.log('📅 Create appointment:', { dto, userId: req.user.id, role: req.user.role });
       return await this.service.create(dto.doctor_id, req.user.id, dto.appointment_date);
     } catch (error) {
-      console.error('❌ Appointment create error:', error);
       return { success: false, message: error.message };
     }
   }
@@ -71,5 +75,15 @@ export class AppointmentController {
     @Body() dto: UpdateAppointmentStatusDto,
   ) {
     return this.service.updateStatus(id, dto.status);
+  }
+
+  @Protected(true)
+  @Roles([UserRoles.doctor, UserRoles.admin])
+  @Patch(':id/prescription')
+  addPrescription(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() body: { prescription: string; recommendations?: string },
+  ) {
+    return this.service.addPrescription(id, body.prescription, body.recommendations);
   }
 }

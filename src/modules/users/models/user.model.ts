@@ -22,6 +22,12 @@ export class User {
   @Prop({ type: SchemaTypes.Number })
   telegram_id?: number;
 
+  @Prop({ type: SchemaTypes.String })
+  telegram_chat_id?: string;
+
+  @Prop({ type: SchemaTypes.Boolean, default: false })
+  telegram_linked?: boolean;
+
   @Prop({ type: SchemaTypes.Boolean, default: true })
   is_active: boolean;
 

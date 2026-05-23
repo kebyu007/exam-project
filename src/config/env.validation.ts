@@ -1,5 +1,5 @@
 import { plainToInstance } from 'class-transformer';
-import { IsInt, IsString, Max, Min, validateSync } from 'class-validator';
+import { IsInt, IsString, IsNotEmpty, Max, Min, validateSync } from 'class-validator';
 
 class EnvVariables {
   @IsInt()
@@ -8,7 +8,16 @@ class EnvVariables {
   PORT: Number;
 
   @IsString()
+  @IsNotEmpty()
   DB_HOST: string;
+
+  @IsString()
+  @IsNotEmpty()
+  JWT_SECRET: string;
+
+  @IsString()
+  @IsNotEmpty()
+  JWT_REFRESH_SECRET: string;
 }
 
 export function validate(config: Record<string, unknown>) {

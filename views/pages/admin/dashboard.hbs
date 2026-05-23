@@ -1,36 +1,105 @@
-<h1 class="mb-4">Admin paneli</h1>
+<div class="page-header sc-fade">
+  <div class="page-header-left">
+    <div class="page-header-icon purple"><i class="fas fa-cog"></i></div>
+    <div>
+      <h2>Admin paneli</h2>
+      <p>Tizimni boshqarish va sozlash</p>
+    </div>
+  </div>
+</div>
 
+<!-- Stats -->
+<div class="row g-3 mb-4 sc-fade">
+  <div class="col-6 col-lg-2">
+    <div class="stat-card">
+      <div class="stat-icon purple"><i class="fas fa-users"></i></div>
+      <div>
+        <div class="stat-value">{{stats.totalUsers}}</div>
+        <div class="stat-label">Foydalanuvchilar</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-2">
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="fas fa-user-md"></i></div>
+      <div>
+        <div class="stat-value">{{stats.totalDoctors}}</div>
+        <div class="stat-label">Shifokorlar</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-2">
+    <div class="stat-card">
+      <div class="stat-icon amber"><i class="fas fa-building"></i></div>
+      <div>
+        <div class="stat-value">{{stats.totalDepartments}}</div>
+        <div class="stat-label">Bo'limlar</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-2">
+    <div class="stat-card">
+      <div class="stat-icon blue"><i class="fas fa-calendar-check"></i></div>
+      <div>
+        <div class="stat-value">{{stats.totalAppointments}}</div>
+        <div class="stat-label">Jami qabullar</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-2">
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="fas fa-calendar-day"></i></div>
+      <div>
+        <div class="stat-value">{{stats.todayAppointments}}</div>
+        <div class="stat-label">Bugungi</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-2">
+    <div class="stat-card">
+      <div class="stat-icon red"><i class="fas fa-clock"></i></div>
+      <div>
+        <div class="stat-value">{{stats.pendingAppointments}}</div>
+        <div class="stat-label">Kutilmoqda</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Nav cards -->
 <div class="row g-4">
-  <div class="col-md-4">
+  <div class="col-md-6 col-lg-4 sc-slide">
     <a href="/admin/users" class="text-decoration-none">
-      <div class="card h-100 border-primary">
-        <div class="card-body text-center py-4">
-          <i class="fas fa-users fa-3x text-primary mb-3"></i>
-          <h5 class="card-title">Foydalanuvchilar</h5>
-          <p class="text-muted small">Foydalanuvchilarni boshqarish va rollarni o'zgartirish</p>
+      <div class="sc-card text-center py-4">
+        <div class="dash-icon purple mx-auto mb-3">
+          <i class="fas fa-users"></i>
         </div>
+        <h5 class="fw-bold text-dark mb-1">Foydalanuvchilar</h5>
+        <p class="text-muted small mb-0">Rollarni boshqarish</p>
       </div>
     </a>
   </div>
-  <div class="col-md-4">
+
+  <div class="col-md-6 col-lg-4 sc-slide" style="animation-delay:0.08s">
     <a href="/admin/doctors" class="text-decoration-none">
-      <div class="card h-100 border-success">
-        <div class="card-body text-center py-4">
-          <i class="fas fa-user-md fa-3x text-success mb-3"></i>
-          <h5 class="card-title">Shifokorlar</h5>
-          <p class="text-muted small">Shifokorlarni boshqarish va yangi shifokor qo'shish</p>
+      <div class="sc-card text-center py-4">
+        <div class="dash-icon green mx-auto mb-3">
+          <i class="fas fa-user-md"></i>
         </div>
+        <h5 class="fw-bold text-dark mb-1">Shifokorlar</h5>
+        <p class="text-muted small mb-0">Shifokorlarni boshqarish</p>
       </div>
     </a>
   </div>
-  <div class="col-md-4">
+
+  <div class="col-md-6 col-lg-4 sc-slide" style="animation-delay:0.16s">
     <a href="/admin/departments" class="text-decoration-none">
-      <div class="card h-100 border-warning">
-        <div class="card-body text-center py-4">
-          <i class="fas fa-building fa-3x text-warning mb-3"></i>
-          <h5 class="card-title">Bo'limlar</h5>
-          <p class="text-muted small">Klinika bo'limlarini boshqarish</p>
+      <div class="sc-card text-center py-4">
+        <div class="dash-icon amber mx-auto mb-3">
+          <i class="fas fa-building"></i>
         </div>
+        <h5 class="fw-bold text-dark mb-1">Bo'limlar</h5>
+        <p class="text-muted small mb-0">Klinika bo'limlari</p>
       </div>
     </a>
   </div>

@@ -54,16 +54,18 @@ export class AuthService {
     const accessToken = await this.generateAccessToken(tokenPayload);
     const refreshToken = await this.generateRefreshToken(tokenPayload);
 
+    const isProd = process.env.NODE_ENV === 'production';
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      secure: isProd,
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      secure: isProd,
+      sameSite: 'strict',
+      maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
     return res.json({ success: true, redirect: '/' });
@@ -121,14 +123,17 @@ export class AuthService {
     const accessToken = await this.generateAccessToken(tokenPayload);
     const refreshToken = await this.generateRefreshToken(tokenPayload);
 
+    const isProd = process.env.NODE_ENV === 'production';
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProd,
+      sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProd,
+      sameSite: 'strict',
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
@@ -185,8 +190,8 @@ export class AuthService {
     email: string;
   }) {
     return this.jwtService.signAsync(payload, {
-      secret: this.configService.get('JWT_SECRET') || 'secret',
-      expiresIn: this.configService.get('JWT_EXPIRES_IN') || '7d',
+      secret: this.configService.getOrThrow<string>('JWT_SECRET'),
+      expiresIn: '15m',
     });
   }
 
@@ -197,7 +202,7 @@ export class AuthService {
     email: string;
   }) {
     return this.jwtService.signAsync(payload, {
-      secret: this.configService.get('JWT_REFRESH_SECRET') || 'refresh-secret',
+      secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
       expiresIn: '30d',
     });
   }

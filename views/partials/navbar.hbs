@@ -1,31 +1,39 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-  <div class="container">
-    <a class="navbar-brand" href="/">Smart Clinic</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
+<nav class="sc-navbar">
+  <div class="container d-flex align-items-center justify-content-between">
+    <a class="nav-brand" href="/">
+      <i class="fas fa-hospital-alt me-2"></i>Smart Clinic
+    </a>
+    <button class="navbar-toggler-btn" id="navToggle" aria-label="Menyu" aria-expanded="false" aria-controls="navMenu">
+      <i class="fas fa-bars"></i>
     </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="/">Bosh sahifa</a></li>
-        <li class="nav-item"><a class="nav-link" href="/doctors">Shifokorlar</a></li>
-        {{#if user}}
-          {{#if (eq user.role 'patient')}}
-            <li class="nav-item"><a class="nav-link" href="/patient/appointments">Mening qabullarim</a></li>
-          {{/if}}
-          {{#if (eq user.role 'doctor')}}
-            <li class="nav-item"><a class="nav-link" href="/doctor/appointments">Qabullar</a></li>
-            <li class="nav-item"><a class="nav-link" href="/doctor/schedule">Jadval</a></li>
-          {{/if}}
-          {{#if (eq user.role 'admin')}}
-            <li class="nav-item"><a class="nav-link" href="/admin">Admin panel</a></li>
-          {{/if}}
-          <li class="nav-item"><a class="nav-link" href="/profile">Profil</a></li>
-          <li class="nav-item"><a class="nav-link" href="/logout">Chiqish</a></li>
-        {{else}}
-          <li class="nav-item"><a class="nav-link" href="/login">Kirish</a></li>
-          <li class="nav-item"><a class="nav-link" href="/register">Ro'yxatdan o'tish</a></li>
+    <ul class="nav-menu" id="navMenu">
+      <li><a class="nav-link" href="/"><i class="fas fa-home me-1"></i>Bosh sahifa</a></li>
+      <li><a class="nav-link" href="/doctors"><i class="fas fa-user-md me-1"></i>Shifokorlar</a></li>
+      {{#if user}}
+        {{#if (eq user.role 'patient')}}
+          <li><a class="nav-link" href="/patient/appointments"><i class="fas fa-calendar-check me-1"></i>Qabullarim</a></li>
         {{/if}}
-      </ul>
-    </div>
+        {{#if (eq user.role 'doctor')}}
+          <li><a class="nav-link" href="/doctor/appointments"><i class="fas fa-clipboard-list me-1"></i>Qabullar</a></li>
+          <li><a class="nav-link" href="/doctor/schedule"><i class="fas fa-calendar-alt me-1"></i>Jadval</a></li>
+        {{/if}}
+        {{#if (eq user.role 'admin')}}
+          <li><a class="nav-link" href="/admin"><i class="fas fa-cog me-1"></i>Admin</a></li>
+        {{/if}}
+        <li><a class="nav-link" href="/profile"><i class="fas fa-user-circle me-1"></i>Profil</a></li>
+        <li><a class="nav-link nav-logout" href="/logout"><i class="fas fa-sign-out-alt me-1"></i>Chiqish</a></li>
+      {{else}}
+        <li><a class="nav-link" href="/login"><i class="fas fa-sign-in-alt me-1"></i>Kirish</a></li>
+        <li><a class="nav-link nav-register" href="/register"><i class="fas fa-user-plus me-1"></i>Ro'yxatdan o'tish</a></li>
+      {{/if}}
+    </ul>
   </div>
 </nav>
+<script>
+  document.getElementById('navToggle').addEventListener('click', function() {
+    const menu = document.getElementById('navMenu');
+    const expanded = this.getAttribute('aria-expanded') === 'true';
+    menu.classList.toggle('open');
+    this.setAttribute('aria-expanded', !expanded);
+  });
+</script>

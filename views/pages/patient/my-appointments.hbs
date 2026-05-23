@@ -1,46 +1,114 @@
-<h1 class="mb-4">Mening qabullarim</h1>
+<div class="page-header sc-fade">
+  <div class="page-header-left">
+    <div class="page-header-icon purple"><i class="fas fa-calendar-check"></i></div>
+    <div>
+      <h2>Mening qabullarim</h2>
+      <p>Barcha qabullaringiz va ularning holati</p>
+    </div>
+  </div>
+  <a href="/doctors" class="btn-action purple">
+    <i class="fas fa-plus me-2"></i>Yangi qabul
+  </a>
+</div>
 
 {{#if appointments.length}}
-  <div class="table-responsive">
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Shifokor</th>
-          <th>Sana</th>
-          <th>Vaqt</th>
-          <th>Holat</th>
-          <th>Amallar</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{#each appointments}}
-          <tr>
-            <td>{{this.doctor_id.user_id.full_name}}</td>
-            <td>{{formatDate this.appointment_date}}</td>
-            <td>{{#if this.appointment_time}}{{this.appointment_time}}{{else}}-{{/if}}</td>
-            <td>
-              {{#if (eq this.status 'pending')}}
-                <span class="badge bg-warning">Kutilmoqda</span>
-              {{else if (eq this.status 'confirmed')}}
-                <span class="badge bg-success">Tasdiqlangan</span>
-              {{else if (eq this.status 'cancelled')}}
-                <span class="badge bg-danger">Bekor qilingan</span>
-              {{else}}
-                <span class="badge bg-secondary">{{this.status}}</span>
+  <div class="row g-4">
+    {{#each appointments}}
+      <div class="col-lg-6 sc-slide" style="animation-delay:{{multiply @index 0.05}}s;">
+        <div class="sc-card">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="d-flex align-items-center gap-3">
+              <div class="doc-avatar">
+                <i class="fas fa-user-md"></i>
+              </div>
+              <div>
+                <h6 class="mb-0 fw-bold">{{this.doctor_id.user_id.full_name}}</h6>
+                <small class="text-muted">{{this.doctor_id.specialization}}</small>
+              </div>
+            </div>
+            <span class="appt-status
+              {{#if (eq this.status 'pending')}}pending
+              {{else if (eq this.status 'confirmed')}}confirmed
+              {{else if (eq this.status 'cancelled')}}cancelled
+              {{else}}done{{/if}}">
+              {{#if (eq this.status 'pending')}}Kutilmoqda
+              {{else if (eq this.status 'confirmed')}}Tasdiqlangan
+              {{else if (eq this.status 'cancelled')}}Bekor qilingan
+              {{else}}Bajarilgan{{/if}}
+            </span>
+          </div>
+
+          <div class="appt-meta mb-3">
+            <span><i class="fas fa-calendar me-1"></i>{{formatDate this.appointment_date}}</span>
+            {{#if this.appointment_time}}<span><i class="fas fa-clock me-1"></i>{{this.appointment_time}}</span>{{/if}}
+          </div>
+
+          <div class="d-flex gap-2">
+            {{#if (eq this.status 'pending')}}
+              <form action="/patient/appointments/{{this._id}}/cancel" method="POST" class="flex-fill" aria-label="Qabulni bekor qilish" onsubmit="return confirm('Qabulni bekor qilishni tasdiqlaysizmi?')">
+                <button type="submit" class="btn-action red w-100">
+                  <i class="fas fa-times me-1"></i>Bekor qilish
+                </button>
+              </form>
+            {{/if}}
+            {{#if (eq this.status 'completed')}}
+              {{#if this.prescription}}
+                <button type="button" class="btn-action purple flex-fill" data-bs-toggle="modal" data-bs-target="#prescription{{this._id}}">
+                  <i class="fas fa-file-medical me-1"></i>Retsept va maslahatlar
+                </button>
               {{/if}}
-            </td>
-            <td>
-              {{#if (eq this.status 'pending')}}
-                <form action="/patient/appointments/{{this._id}}/cancel" method="POST" style="display:inline;">
-                  <button type="submit" class="btn btn-sm btn-danger">Bekor qilish</button>
-                </form>
-              {{/if}}
-            </td>
-          </tr>
-        {{/each}}
-      </tbody>
-    </table>
+            {{/if}}
+          </div>
+        </div>
+      </div>
+    {{/each}}
   </div>
+
+  {{#each appointments}}
+    {{#if (eq this.status 'completed')}}
+      {{#if this.prescription}}
+        <div class="modal fade" id="prescription{{this._id}}" tabindex="-1" aria-labelledby="prescriptionLabel{{this._id}}" aria-modal="true" role="dialog">
+          <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="mm-modal modal-content">
+              <div class="mm-header purple">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="mm-header-icon"><i class="fas fa-file-medical"></i></div>
+                  <div>
+                    <h6 class="mb-0 fw-bold">Retsept</h6>
+                    <small class="opacity-75">{{this.doctor_id.user_id.full_name}} · {{formatDate this.appointment_date}}</small>
+                  </div>
+                </div>
+                <button type="button" class="mm-close" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
+              </div>
+              <div class="mm-body">
+                <div class="rx-block mb-3">
+                  <p class="rx-label"><i class="fas fa-pills me-2"></i>Dorilar</p>
+                  <pre class="rx-content">{{this.prescription}}</pre>
+                </div>
+                {{#if this.recommendations}}
+                  <div class="rx-block">
+                    <p class="rx-label"><i class="fas fa-clipboard-list me-2"></i>Maslahatlar</p>
+                    <pre class="rx-content">{{this.recommendations}}</pre>
+                  </div>
+                {{/if}}
+              </div>
+              <div class="mm-footer">
+                <button type="button" class="mm-btn-cancel" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>Yopish</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      {{/if}}
+    {{/if}}
+  {{/each}}
 {{else}}
-  <div class="alert alert-info">Sizda hali qabullar yo'q. <a href="/doctors">Shifokorlarni ko'ring</a></div>
+  <div class="text-center py-5 sc-fade">
+    <i class="fas fa-calendar-times fa-4x text-muted mb-3 d-block"></i>
+    <h5 class="text-muted mb-2">Sizda hali qabullar yo'q</h5>
+    <p class="text-muted mb-4">Shifokorlarni ko'ring va qabulga yoziling</p>
+    <a href="/doctors" class="btn-action purple" style="display:inline-flex;">
+      <i class="fas fa-user-md me-2"></i>Shifokorlarni ko'rish
+    </a>
+  </div>
 {{/if}}
+

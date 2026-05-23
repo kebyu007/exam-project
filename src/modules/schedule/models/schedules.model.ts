@@ -19,8 +19,13 @@ export class Schedule {
   @Prop({ type: Types.ObjectId, ref: Doctor.name, required: true })
   doctor_id: Types.ObjectId;
 
-  @Prop({ type: String, enum: WeekDay, required: true })
-  work_day: WeekDay;
+  // Aniq sana (kunlik jadval uchun)
+  @Prop({ type: Date, required: false })
+  date?: Date;
+
+  // Haftalik jadval uchun (agar date yo'q bo'lsa)
+  @Prop({ type: String, enum: WeekDay, required: false })
+  work_day?: WeekDay;
 
   @Prop({ type: String, required: true })
   start_time: string;
@@ -28,11 +33,24 @@ export class Schedule {
   @Prop({ type: String, required: true })
   end_time: string;
 
-  @Prop({ type: String, required: false })
-  break_start: string;
+  // Tushlik vaqti
+  @Prop({ type: String, required: false, default: '13:00' })
+  break_start?: string;
 
+  @Prop({ type: String, required: false, default: '14:00' })
+  break_end?: string;
+
+  // Slot davomiyligi (daqiqalarda)
+  @Prop({ type: Number, required: false, default: 30 })
+  slot_duration?: number;
+
+  // Jadval faolmi
+  @Prop({ type: Boolean, required: false, default: true })
+  is_available?: boolean;
+
+  // Izoh (dam olish sababi va h.k.)
   @Prop({ type: String, required: false })
-  break_end: string;
+  note?: string;
 }
 
 export const ScheduleSchema = SchemaFactory.createForClass(Schedule);

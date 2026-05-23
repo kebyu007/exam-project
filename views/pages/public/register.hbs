@@ -1,73 +1,103 @@
-<div class="row justify-content-center">
-  <div class="col-md-6">
-    <div class="card">
-      <div class="card-body">
-        <h2 class="card-title text-center mb-4">Ro'yxatdan o'tish</h2>
+<div class="auth-wrap sc-fade">
+  <div class="auth-card">
+    <div class="auth-side">
+      <i class="fas fa-user-plus fa-5x mb-4 animate-float"></i>
+      <h2 class="fw-bold mb-2">Xush kelibsiz!</h2>
+      <p>Ro'yxatdan o'ting va shifokorga yoziling</p>
+    </div>
+    <div class="auth-form-side">
+      <div class="text-center mb-4">
+        <h3 class="fw-bold mb-1"><i class="fas fa-user-plus text-success me-2"></i>Ro'yxatdan o'tish</h3>
+        <p class="text-muted small">Yangi hisob yarating</p>
+      </div>
 
-        <form id="registerForm">
-          <div class="mb-3">
-            <label for="full_name" class="form-label">To'liq ism</label>
-            <input type="text" class="form-control" id="full_name" name="full_name" required>
-          </div>
-          <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input type="email" class="form-control" id="email" name="email" required>
-          </div>
-          <div class="mb-3">
-            <label for="password" class="form-label">Parol</label>
-            <input type="password" class="form-control" id="password" name="password" required>
-          </div>
-          <div class="mb-3">
-            <label for="confirm_password" class="form-label">Parolni tasdiqlang</label>
-            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
-          </div>
-          <button type="submit" class="btn btn-primary w-100">Ro'yxatdan o'tish</button>
-        </form>
-
-        <div class="text-center mt-3">
-          <p>Hisobingiz bormi? <a href="/login">Kirish</a></p>
+      <form id="registerForm" novalidate>
+        <div class="mf-field">
+          <label class="mf-label"><i class="fas fa-user"></i> To'liq ism</label>
+          <input type="text" class="mf-input" id="full_name" placeholder="Ism Familiya" required>
+          <div class="field-error" id="nameError">Ism kiritilmagan</div>
         </div>
+        <div class="mf-field">
+          <label class="mf-label"><i class="fas fa-envelope"></i> Email</label>
+          <input type="email" class="mf-input" id="email" placeholder="email@example.com" required>
+          <div class="field-error" id="emailError">To'g'ri email kiriting</div>
+        </div>
+        <div class="mf-field">
+          <label class="mf-label"><i class="fas fa-lock"></i> Parol</label>
+          <div class="mf-pass-wrap">
+            <input type="password" class="mf-input" id="password" placeholder="••••••••" required minlength="6">
+            <button type="button" class="mf-pass-toggle" onclick="toggleMfPass('password',this)" tabindex="-1"><i class="fas fa-eye"></i></button>
+          </div>
+          <div class="field-error" id="passwordError">Kamida 6 ta belgi kiriting</div>
+        </div>
+        <div class="mf-field">
+          <label class="mf-label"><i class="fas fa-lock"></i> Parolni tasdiqlang</label>
+          <div class="mf-pass-wrap">
+            <input type="password" class="mf-input" id="confirm_password" placeholder="••••••••" required>
+            <button type="button" class="mf-pass-toggle" onclick="toggleMfPass('confirm_password',this)" tabindex="-1"><i class="fas fa-eye"></i></button>
+          </div>
+          <div class="field-error" id="confirmError">Parollar mos kelmadi</div>
+        </div>
+        <button type="submit" class="btn-auth-submit green w-100 mb-3">
+          <i class="fas fa-user-plus me-2"></i>Ro'yxatdan o'tish
+        </button>
+      </form>
+
+      <div class="text-center">
+        <p class="mb-0 small">Hisobingiz bormi? <a href="/login" class="fw-semibold">Kirish</a></p>
       </div>
     </div>
   </div>
 </div>
 
 <script>
+function toggleMfPass(id, btn) {
+  const input = document.getElementById(id);
+  const icon = btn.querySelector('i');
+  input.type = input.type === 'password' ? 'text' : 'password';
+  icon.className = input.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+}
+
+const showErr = (id, msg) => {
+  const el = document.getElementById(id);
+  msg ? (el.textContent = msg, el.classList.add('show')) : el.classList.remove('show');
+};
+
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const formData = new FormData(e.target);
-  const data = Object.fromEntries(formData);
+  const name = document.getElementById('full_name');
+  const email = document.getElementById('email');
+  const password = document.getElementById('password');
+  const confirm = document.getElementById('confirm_password');
+  let valid = true;
 
-  console.log('Toast object:', typeof Toast, Toast);
+  if (!name.value.trim()) { name.classList.add('mf-invalid'); showErr('nameError', 'Ism kiritilmagan'); valid = false; }
+  else { name.classList.remove('mf-invalid'); showErr('nameError', ''); }
 
-  if (data.password !== data.confirm_password) {
-    Toast.error('Parollar mos kelmadi');
-    return;
-  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) { email.classList.add('mf-invalid'); showErr('emailError', "To'g'ri email kiriting"); valid = false; }
+  else { email.classList.remove('mf-invalid'); showErr('emailError', ''); }
 
-  const { confirm_password, ...payload } = data;
+  if (password.value.length < 6) { password.classList.add('mf-invalid'); showErr('passwordError', 'Kamida 6 ta belgi kiriting'); valid = false; }
+  else { password.classList.remove('mf-invalid'); showErr('passwordError', ''); }
+
+  if (confirm.value !== password.value) { confirm.classList.add('mf-invalid'); showErr('confirmError', 'Parollar mos kelmadi'); valid = false; }
+  else { confirm.classList.remove('mf-invalid'); showErr('confirmError', ''); }
+
+  if (!valid) return;
 
   try {
-    const response = await fetch('/register', {
+    const res = await fetch('/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({ full_name: name.value, email: email.value, password: password.value })
     });
-
-    const result = await response.json();
-    console.log('Response:', response.status, result);
-
-    if (response.ok) {
+    const data = await res.json();
+    if (res.ok) {
       Toast.success('Emailga tasdiqlash kodi yuborildi');
-      setTimeout(() => window.location.href = result.redirect, 1000);
+      setTimeout(() => window.location.href = data.redirect, 1000);
     } else {
-      const msg = Array.isArray(result.message) ? result.message[0] : result.message;
-      console.log('Error message:', msg);
-      Toast.error(msg || 'Ro\'yxatdan o\'tish xatosi');
+      Toast.error(Array.isArray(data.message) ? data.message[0] : data.message || "Ro'yxatdan o'tish xatosi");
     }
-  } catch (error) {
-    console.error('Catch error:', error);
-    Toast.error('Tarmoq xatosi');
-  }
+  } catch { Toast.error('Tarmoq xatosi'); }
 });
 </script>

@@ -82,7 +82,7 @@ export class AuthGuard implements CanActivate {
   private async verifyAccessToken(token: string): Promise<any> {
     try {
       return await this.jwtService.verifyAsync(token, {
-        secret: this.configService.get<string>('JWT_SECRET') || 'secret',
+        secret: this.configService.getOrThrow<string>('JWT_SECRET'),
       });
     } catch (error) {
       if (error instanceof TokenExpiredError) throw error;
@@ -98,7 +98,7 @@ export class AuthGuard implements CanActivate {
   ): Promise<any> {
     try {
       const payload = await this.jwtService.verifyAsync(refreshToken, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET') || 'refresh-secret',
+        secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
       });
 
       const newAccessToken = await this.generateAccessToken({
@@ -111,6 +111,7 @@ export class AuthGuard implements CanActivate {
       res.cookie('accessToken', newAccessToken, {
         httpOnly: true,
         secure: this.configService.get('NODE_ENV') === 'production',
+        sameSite: 'strict',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
@@ -135,8 +136,8 @@ export class AuthGuard implements CanActivate {
     email: string;
   }): Promise<string> {
     return this.jwtService.signAsync(payload, {
-      secret: this.configService.get('JWT_SECRET') || 'secret',
-      expiresIn: this.configService.get('JWT_EXPIRES_IN') || '7d',
+      secret: this.configService.getOrThrow<string>('JWT_SECRET'),
+      expiresIn: '15m',
     });
   }
 }

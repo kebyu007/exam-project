@@ -1,70 +1,95 @@
-<h1 class="mb-4">Bo'limlarni boshqarish</h1>
+<div class="page-header sc-fade">
+  <div class="page-header-left">
+    <div class="page-header-icon amber"><i class="fas fa-building"></i></div>
+    <div>
+      <h2>Bo'limlarni boshqarish</h2>
+      <p>Klinika bo'limlarini boshqarish va yangi bo'lim qo'shish</p>
+    </div>
+  </div>
+</div>
 
 <div class="row mb-4">
-  <div class="col-md-6">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Yangi bo'lim qo'shish</h5>
-        <form action="/admin/departments" method="POST">
-          <div class="mb-3">
-            <label for="name" class="form-label">Bo'lim nomi</label>
-            <input type="text" class="form-control" id="name" name="name" required>
-          </div>
-          <button type="submit" class="btn btn-primary">Qo'shish</button>
-        </form>
-      </div>
+  <div class="col-lg-5 sc-slide">
+    <div class="sc-card" style="border-top: 3px solid #f59e0b;">
+      <h6 class="fw-bold mb-3" style="color:#d97706;">
+        <i class="fas fa-plus-circle me-2"></i>Yangi bo'lim qo'shish
+      </h6>
+      <form action="/admin/departments" method="POST">
+        <div class="mf-field">
+          <label class="mf-label"><i class="fas fa-hospital" style="color:#f59e0b;"></i> Bo'lim nomi</label>
+          <input type="text" class="mf-input" name="name" placeholder="Masalan: Kardiologiya" required>
+        </div>
+        <button type="submit" class="btn-action amber w-100">
+          <i class="fas fa-plus me-2"></i>Qo'shish
+        </button>
+      </form>
     </div>
   </div>
 </div>
 
 {{#if departments.length}}
-  <div class="table-responsive">
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Nomi</th>
-          <th>Amallar</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{#each departments}}
-          <tr>
-            <td>{{this.name}}</td>
-            <td>
-              <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editModal{{this._id}}">Tahrirlash</button>
-              <form action="/admin/departments/{{this._id}}/delete" method="POST" style="display:inline;">
-                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Ishonchingiz komilmi?')">O'chirish</button>
-              </form>
-            </td>
-          </tr>
+  <div class="d-flex align-items-center gap-2 mb-3">
+    <h5 class="mb-0 fw-bold">Mavjud bo'limlar</h5>
+    <span class="count-badge amber">{{departments.length}}</span>
+  </div>
 
-          <!-- Edit Modal -->
-          <div class="modal fade" id="editModal{{this._id}}" tabindex="-1">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title">Bo'limni tahrirlash</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form action="/admin/departments/{{this._id}}/update" method="POST">
-                  <div class="modal-body">
-                    <div class="mb-3">
-                      <label class="form-label">Bo'lim nomi</label>
-                      <input type="text" class="form-control" name="name" value="{{this.name}}" required>
-                    </div>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bekor qilish</button>
-                    <button type="submit" class="btn btn-primary">Saqlash</button>
-                  </div>
-                </form>
-              </div>
-            </div>
+  <div class="row g-3">
+    {{#each departments}}
+      <div class="col-md-6 col-lg-4 sc-slide" style="animation-delay:{{multiply @index 0.05}}s;">
+        <div class="sc-card d-flex align-items-center gap-3">
+          <div class="dept-icon">
+            <i class="fas fa-hospital"></i>
           </div>
-        {{/each}}
-      </tbody>
-    </table>
+          <div class="flex-grow-1 min-w-0">
+            <h6 class="mb-0 fw-bold text-truncate">{{this.name}}</h6>
+          </div>
+          <div class="d-flex gap-2 flex-shrink-0">
+            <button class="icon-btn edit" data-bs-toggle="modal" data-bs-target="#editModal{{this._id}}" title="Tahrirlash">
+              <i class="fas fa-edit"></i>
+            </button>
+            <form action="/admin/departments/{{this._id}}/delete" method="POST" onsubmit="return confirm('Ishonchingiz komilmi?')">
+              <button type="submit" class="icon-btn delete" title="O'chirish">
+                <i class="fas fa-trash"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="editModal{{this._id}}" tabindex="-1" aria-labelledby="editModalLabel{{this._id}}" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+          <div class="mm-modal modal-content">
+            <div class="mm-header amber">
+              <div class="d-flex align-items-center gap-3">
+                <div class="mm-header-icon"><i class="fas fa-building"></i></div>
+                <div>
+                  <h6 class="mb-0 fw-bold">Bo'limni tahrirlash</h6>
+                  <small class="opacity-75">{{this.name}}</small>
+                </div>
+              </div>
+              <button type="button" class="mm-close" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
+            </div>
+            <form action="/admin/departments/{{this._id}}/update" method="POST">
+              <div class="mm-body">
+                <div class="mf-field mb-0">
+                  <label class="mf-label"><i class="fas fa-hospital" style="color:#f59e0b;"></i> Bo'lim nomi</label>
+                  <input type="text" class="mf-input" name="name" value="{{this.name}}" required>
+                </div>
+              </div>
+              <div class="mm-footer">
+                <button type="button" class="mm-btn-cancel" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>Bekor</button>
+                <button type="submit" class="mm-btn-save amber"><i class="fas fa-save me-1"></i>Saqlash</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    {{/each}}
   </div>
 {{else}}
-  <div class="alert alert-info">Hozircha bo'limlar yo'q.</div>
+  <div class="text-center py-5 sc-fade">
+    <i class="fas fa-building fa-4x text-muted mb-3 d-block"></i>
+    <h5 class="text-muted">Hozircha bo'limlar yo'q</h5>
+  </div>
 {{/if}}
+

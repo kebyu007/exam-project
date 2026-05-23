@@ -1,6 +1,5 @@
-// update-schedule.dto.ts
 import { PartialType } from '@nestjs/mapped-types';
-import { IsOptional, IsString, Matches, ValidateIf, IsEnum } from 'class-validator';
+import { IsOptional, IsString, Matches, ValidateIf, IsEnum, IsInt, Min, Max } from 'class-validator';
 import { IsAfterTime } from '@/common/decorators/is-after-time.decorator';
 import { IsWeekday } from '@/common/decorators/is-weekday.decorator';
 import { IsFutureDate } from '@/common/decorators/is-future-date.decorator';
@@ -30,4 +29,10 @@ export class UpdateScheduleDto extends PartialType(CreateScheduleDto) {
   })
   @IsAfterTime('start_time')
   end_time?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(10)
+  @Max(120)
+  slot_duration?: number;
 }

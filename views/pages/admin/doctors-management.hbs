@@ -1,74 +1,123 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h1>Shifokorlarni boshqarish</h1>
-  <a href="/admin/add-doctor" class="btn btn-primary">
-    <i class="bi bi-plus-circle"></i> Yangi shifokor qo'shish
-  </a>
+<div class="page-header mb-5 animate-fade-in">
+  <div class="d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center gap-3">
+      <div class="header-icon">
+        <i class="fas fa-user-md"></i>
+      </div>
+      <div>
+        <h2 class="mb-0 fw-bold">Shifokorlarni boshqarish</h2>
+        <p class="text-muted mb-0 small">Shifokorlar ma'lumotlarini ko'rish va tahrirlash</p>
+      </div>
+    </div>
+    <a href="/admin/add-doctor" class="btn-add-doctor">
+      <i class="fas fa-plus me-2"></i>Yangi shifokor
+    </a>
+  </div>
 </div>
 
 {{#if doctors.length}}
-  <div class="table-responsive">
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Ism</th>
-          <th>Email</th>
-          <th>Mutaxassislik</th>
-          <th>Tajriba</th>
-          <th>Xona</th>
-          <th>Amallar</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{#each doctors}}
-          <tr>
-            <td>{{this.user_id.full_name}}</td>
-            <td>{{this.user_id.email}}</td>
-            <td>{{this.specialization}}</td>
-            <td>{{this.experience}} yil</td>
-            <td>{{this.room_number}}</td>
-            <td>
-              <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editModal{{this._id}}">Tahrirlash</button>
-              <form action="/admin/doctors/{{this._id}}/delete" method="POST" style="display:inline;">
-                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Ishonchingiz komilmi?')">O'chirish</button>
-              </form>
-            </td>
-          </tr>
-
-          <!-- Edit Modal -->
-          <div class="modal fade" id="editModal{{this._id}}" tabindex="-1">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title">Shifokorni tahrirlash</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form action="/admin/doctors/{{this._id}}/update" method="POST">
-                  <div class="modal-body">
-                    <div class="mb-3">
-                      <label class="form-label">Mutaxassislik</label>
-                      <input type="text" class="form-control" name="specialization" value="{{this.specialization}}" required>
-                    </div>
-                    <div class="mb-3">
-                      <label class="form-label">Tajriba (yil)</label>
-                      <input type="number" class="form-control" name="experience" value="{{this.experience}}" required>
-                    </div>
-                    <div class="mb-3">
-                      <label class="form-label">Xona raqami</label>
-                      <input type="text" class="form-control" name="room_number" value="{{this.room_number}}" required>
-                    </div>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bekor qilish</button>
-                    <button type="submit" class="btn btn-primary">Saqlash</button>
-                  </div>
-                </form>
-              </div>
+  <div class="row g-4">
+    {{#each doctors}}
+      <div class="col-md-6 col-lg-4 animate-slide-up" style="animation-delay: {{multiply @index 0.05}}s;">
+        <div class="doctor-card h-100">
+          <div class="d-flex align-items-start gap-3 mb-3">
+            <div class="doctor-avatar">
+              <i class="fas fa-user-md"></i>
+            </div>
+            <div class="flex-grow-1 min-w-0">
+              <h6 class="mb-1 fw-bold text-truncate">{{this.user_id.full_name}}</h6>
+              <p class="text-muted small mb-0 text-truncate">
+                <i class="fas fa-envelope me-1"></i>{{this.user_id.email}}
+              </p>
             </div>
           </div>
-        {{/each}}
-      </tbody>
-    </table>
+
+          <div class="doctor-info mb-3">
+            <div class="info-row">
+              <i class="fas fa-stethoscope"></i>
+              <span>{{this.specialization}}</span>
+            </div>
+            <div class="info-row">
+              <i class="fas fa-award"></i>
+              <span>{{this.experience}} yil tajriba</span>
+            </div>
+            <div class="info-row">
+              <i class="fas fa-door-open"></i>
+              <span>Xona {{this.room_number}}</span>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button class="btn-edit flex-grow-1" data-bs-toggle="modal" data-bs-target="#editModal{{this._id}}">
+              <i class="fas fa-edit me-1"></i>Tahrirlash
+            </button>
+            <form action="/admin/doctors/{{this._id}}/delete" method="POST" class="flex-grow-1" onsubmit="return confirm('Ishonchingiz komilmi?')">
+              <button type="submit" class="btn-delete w-100">
+                <i class="fas fa-trash me-1"></i>O'chirish
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Modal -->
+      <div class="modal fade" id="editModal{{this._id}}" tabindex="-1" aria-labelledby="editModalLabel{{this._id}}" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modern-modal">
+            <div class="modern-modal-header">
+              <div class="d-flex align-items-center gap-3">
+                <div class="modal-icon">
+                  <i class="fas fa-user-md"></i>
+                </div>
+                <div>
+                  <h5 class="mb-0 fw-bold">Shifokorni tahrirlash</h5>
+                  <small class="opacity-75">{{this.user_id.full_name}}</small>
+                </div>
+              </div>
+              <button type="button" class="modal-close-btn" data-bs-dismiss="modal">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <form action="/admin/doctors/{{this._id}}/update" method="POST">
+              <div class="modern-modal-body">
+                <div class="modern-field">
+                  <label class="modern-label"><i class="fas fa-stethoscope"></i> Mutaxassislik</label>
+                  <input type="text" class="modern-input" name="specialization" value="{{this.specialization}}" required>
+                </div>
+                <div class="row g-3">
+                  <div class="col-6">
+                    <div class="modern-field">
+                      <label class="modern-label"><i class="fas fa-award"></i> Tajriba (yil)</label>
+                      <input type="number" class="modern-input" name="experience" value="{{this.experience}}" min="0" required>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="modern-field">
+                      <label class="modern-label"><i class="fas fa-door-open"></i> Xona raqami</label>
+                      <input type="text" class="modern-input" name="room_number" value="{{this.room_number}}" required>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modern-modal-footer">
+                <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal">
+                  <i class="fas fa-times me-2"></i>Bekor qilish
+                </button>
+                <button type="submit" class="btn-modal-save">
+                  <i class="fas fa-save me-2"></i>Saqlash
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    {{/each}}
   </div>
 {{else}}
-  <div class="alert alert-info">Hozircha shifokorlar yo'q.</div>
+  <div class="text-center py-5 animate-fade-in">
+    <i class="fas fa-user-md fa-5x text-muted mb-3"></i>
+    <h4 class="text-muted">Hozircha shifokorlar yo'q</h4>
+    <p class="text-muted">Yangi shifokor qo'shish uchun yuqoridagi tugmani bosing</p>
+  </div>
 {{/if}}
+

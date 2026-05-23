@@ -1,70 +1,90 @@
-<h1 class="mb-4">Mening profilim</h1>
-
-<div class="row">
-  <div class="col-md-6">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Shaxsiy ma'lumotlar</h5>
-        <p><strong>Ism:</strong> {{user.full_name}}</p>
-        <p><strong>Email:</strong> {{user.email}}</p>
-        <p><strong>Rol:</strong> {{user.role}}</p>
-        <p><strong>Holat:</strong> {{#if user.is_active}}Faol{{else}}Nofaol{{/if}}</p>
-      </div>
-    </div>
-  </div>
-  
-  <div class="col-md-6">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Profil rasmini yangilash</h5>
-        <form action="/patient/profile/upload" method="POST" enctype="multipart/form-data">
-          <div class="mb-3">
-            <label for="profile" class="form-label">Rasm tanlang</label>
-            <input type="file" class="form-control" id="profile" name="profile" accept="image/*" required>
+<div class="row g-4 animate-fade-in">
+  <!-- Left: Profile Card -->
+  <div class="col-lg-4 animate-slide-up">
+    <div class="profile-card text-center">
+      <div class="profile-avatar-wrap mb-3">
+        {{#if user.profile}}
+          <img src="/uploads/user-profile/{{user.profile}}"
+            class="profile-avatar"
+            alt="{{user.full_name}}">
+        {{else}}
+          <div class="profile-avatar-placeholder">
+            <i class="fas fa-user"></i>
           </div>
-          <button type="submit" class="btn btn-primary">Yuklash</button>
+        {{/if}}
+        <form action="/patient/profile/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
+          <input type="file" name="profile" id="fileInput" accept="image/*" class="d-none"
+            onchange="document.getElementById('uploadForm').submit()">
+          <button type="button" class="avatar-upload-btn"
+            onclick="document.getElementById('fileInput').click()">
+            <i class="fas fa-camera"></i>
+          </button>
         </form>
       </div>
+      <h4 class="fw-bold mb-1">{{user.full_name}}</h4>
+      <p class="text-muted small mb-3">
+        <i class="fas fa-envelope me-1"></i>{{user.email}}
+      </p>
+      <span class="status-pill {{#if user.is_active}}status-active{{else}}status-inactive{{/if}}">
+        <i class="fas {{#if user.is_active}}fa-check-circle{{else}}fa-times-circle{{/if}} me-1"></i>
+        {{#if user.is_active}}Faol{{else}}Nofaol{{/if}}
+      </span>
     </div>
   </div>
-</div>
 
-<div class="row mt-4">
-  <div class="col-12">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Qabullar tarixi</h5>
+  <!-- Right: Appointments -->
+  <div class="col-lg-8 animate-slide-up" style="animation-delay:0.1s">
+    <div class="profile-section">
+      <div class="section-header">
+        <i class="fas fa-calendar-check"></i>
+        <span>Qabullar tarixi</span>
         {{#if appointments.length}}
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Shifokor</th>
-                <th>Sana</th>
-                <th>Holat</th>
-              </tr>
-            </thead>
-            <tbody>
-              {{#each appointments}}
-                <tr>
-                  <td>{{this.doctor_id.user_id.full_name}}</td>
-                  <td>{{formatDate this.appointment_date}}</td>
-                  <td>
-                    {{#if (eq this.status 'pending')}}
-                      <span class="badge badge-pending">Kutilmoqda</span>
-                    {{else if (eq this.status 'confirmed')}}
-                      <span class="badge badge-confirmed">Tasdiqlangan</span>
-                    {{else if (eq this.status 'done')}}
-                      <span class="badge badge-done">Bajarilgan</span>
-                    {{/if}}
-                  </td>
-                </tr>
-              {{/each}}
-            </tbody>
-          </table>
+          <span class="ms-auto badge-count">{{appointments.length}}</span>
+        {{/if}}
+      </div>
+      <div class="section-body">
+        {{#if appointments.length}}
+          <div class="d-flex flex-column gap-3">
+            {{#each appointments}}
+              <div class="appointment-item">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="appt-icon">
+                    <i class="fas fa-user-md"></i>
+                  </div>
+                  <div class="flex-grow-1 min-w-0">
+                    <h6 class="mb-0 fw-bold text-truncate">{{this.doctor_id.user_id.full_name}}</h6>
+                    <small class="text-muted">{{this.doctor_id.specialization}}</small>
+                  </div>
+                  <span class="appt-status
+                    {{#if (eq this.status 'pending')}}appt-pending
+                    {{else if (eq this.status 'confirmed')}}appt-confirmed
+                    {{else if (eq this.status 'done')}}appt-done
+                    {{else}}appt-cancelled{{/if}}">
+                    {{#if (eq this.status 'pending')}}Kutilmoqda
+                    {{else if (eq this.status 'confirmed')}}Tasdiqlangan
+                    {{else if (eq this.status 'done')}}Bajarilgan
+                    {{else}}Bekor qilingan{{/if}}
+                  </span>
+                </div>
+                <div class="appt-meta mt-2">
+                  <span><i class="fas fa-calendar me-1"></i>{{formatDate this.appointment_date}}</span>
+                  <span><i class="fas fa-clock me-1"></i>{{this.appointment_time}}</span>
+                </div>
+              </div>
+            {{/each}}
+          </div>
         {{else}}
-          <p class="text-muted">Hozircha qabullar yo'q</p>
+          <div class="empty-state">
+            <i class="fas fa-calendar-times"></i>
+            <h5>Hozircha qabullar yo'q</h5>
+            <p>Shifokorga qabul yozilish uchun quyidagi tugmani bosing</p>
+            <a href="/patient/book-appointment" class="btn-book">
+              <i class="fas fa-calendar-plus me-2"></i>Qabul yozish
+            </a>
+          </div>
         {{/if}}
       </div>
     </div>
   </div>
 </div>
+

@@ -19,6 +19,7 @@ export class SeederService implements OnApplicationBootstrap {
   ) {}
 
   async onApplicationBootstrap() {
+    if (process.env.NODE_ENV === 'production') return;
     this.logger.log('🌱 Starting seeding process...');
     await this.seedAdmin();
     await this.seedDepartments();

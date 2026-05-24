@@ -129,7 +129,29 @@ export class PagesService {
     return { totalUsers, totalDoctors, totalDepartments, totalAppointments, todayAppointments, pendingAppointments };
   }
 
-  getDepartments() {    return this.departmentModel.find().lean();
+  getDepartments() {
+    return this.departmentModel.find().lean();
+  }
+
+  async getDepartmentsWithDoctorCount() {
+    const [departments, doctors] = await Promise.all([
+      this.departmentModel.find().lean(),
+      this.doctorModel.find().lean(),
+    ]);
+    const countMap: Record<string, number> = {};
+    for (const d of doctors) {
+      const key = d.department_id?.toString();
+      if (key) countMap[key] = (countMap[key] || 0) + 1;
+    }
+    return departments.map(dept => ({ ...dept, doctorCount: countMap[(dept as any)._id.toString()] || 0 }));
+  }
+
+  getDepartmentById(id: string) {
+    return this.departmentModel.findById(id).lean();
+  }
+
+  getDoctorsByDepartment(departmentId: string) {
+    return this.doctorModel.find({ department_id: departmentId }).populate('user_id').lean();
   }
 
   createDepartment(name: string) {

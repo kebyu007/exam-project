@@ -1,0 +1,43 @@
+<div class="page-header sc-fade">
+  <div class="page-header-left">
+    <div class="page-header-icon blue"><i class="fas fa-hospital"></i></div>
+    <div>
+      <h2>Bo'limlar</h2>
+      <p>Kerakli bo'limni tanlang va shifokorlarni ko'ring</p>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  {{#each departments}}
+    <div class="col-md-6 col-lg-4 sc-slide" style="animation-delay:{{multiply @index 0.07}}s;">
+      <a href="/departments/{{this._id}}" class="dept-card-link h-100 d-block">
+        <div class="sc-card dept-card text-center h-100 d-flex flex-column justify-content-between">
+          <div>
+            <div class="dept-icon-wrap mb-3">
+              <div class="dept-icon">
+                <i class="fas fa-stethoscope"></i>
+              </div>
+            </div>
+            <h5 class="fw-bold mb-2">{{this.name}}</h5>
+            <p class="text-muted small mb-3">{{#if this.description}}{{this.description}}{{else}}Mutaxassis shifokorlar bilan sifatli tibbiy xizmat{{/if}}</p>
+          </div>
+          <div>
+            <div class="dept-doctor-count mb-3">
+              <i class="fas fa-user-md me-1"></i>
+              <span>{{this.doctorCount}} ta shifokor</span>
+            </div>
+            <div class="dept-arrow">
+              <i class="fas fa-arrow-right"></i> Shifokorlarni ko'rish
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+  {{else}}
+    <div class="col-12 text-center py-5 sc-fade">
+      <i class="fas fa-hospital fa-4x text-muted mb-3 d-block"></i>
+      <h5 class="text-muted">Hozircha bo'limlar mavjud emas</h5>
+    </div>
+  {{/each}}
+</div>

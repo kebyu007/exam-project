@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, Res, Query, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, Query, Param, UseInterceptors, UploadedFile } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Protected } from '@/common/decorators/protected.decorator';
@@ -21,8 +21,26 @@ export class PublicPagesController {
   @Roles([UserRoles.viewer])
   @Get('doctors')
   async doctorsPage(@Req() req: Request & { user?: any }, @Res() res: Response) {
-    const doctors = await this.pagesService.getDoctors();
-    return res.render('pages/public/doctors', { title: 'Shifokorlar', doctors, user: req.user });
+    const departments = await this.pagesService.getDepartmentsWithDoctorCount();
+    return res.render('pages/public/departments', { title: 'Bo\'limlar', departments, user: req.user });
+  }
+
+  @Protected(false)
+  @Roles([UserRoles.viewer])
+  @Get('departments')
+  async departmentsPage(@Req() req: Request & { user?: any }, @Res() res: Response) {
+    const departments = await this.pagesService.getDepartmentsWithDoctorCount();
+    return res.render('pages/public/departments', { title: 'Bo\'limlar', departments, user: req.user });
+  }
+
+  @Protected(false)
+  @Roles([UserRoles.viewer])
+  @Get('departments/:id')
+  async departmentDoctorsPage(@Param('id') id: string, @Req() req: Request & { user?: any }, @Res() res: Response) {
+    const department = await this.pagesService.getDepartmentById(id);
+    if (!department) return res.redirect('/departments');
+    const doctors = await this.pagesService.getDoctorsByDepartment(id);
+    return res.render('pages/public/department-doctors', { title: department.name, department, doctors, user: req.user });
   }
 
   @Protected(false)

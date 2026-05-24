@@ -1,0 +1,61 @@
+<div class="page-header sc-fade">
+  <div class="page-header-left">
+    <div class="page-header-icon blue"><i class="fas fa-hospital"></i></div>
+    <div>
+      <h2>{{department.name}}</h2>
+      <p>Bo'lim shifokorlari</p>
+    </div>
+  </div>
+  <a href="/departments" class="btn-back-link">
+    <i class="fas fa-arrow-left me-2"></i>Bo'limlarga qaytish
+  </a>
+</div>
+
+<div class="row g-4">
+  {{#each doctors}}
+    <div class="col-md-6 col-lg-4 sc-slide" style="animation-delay:{{multiply @index 0.07}}s;">
+      <div class="sc-card doctor-card text-center h-100 d-flex flex-column justify-content-between">
+        <div>
+          <div class="doctor-photo-wrap mb-3">
+            {{#if this.user_id.profile}}
+              <img src="/uploads/user-profile/{{this.user_id.profile}}"
+                class="doctor-photo" alt="{{this.user_id.full_name}}">
+            {{else}}
+              <div class="doctor-photo-placeholder">
+                <i class="fas fa-user-md"></i>
+              </div>
+            {{/if}}
+          </div>
+          <h5 class="fw-bold mb-1">{{this.user_id.full_name}}</h5>
+          <p class="spec-tag mb-3">{{#if this.specialization}}{{this.specialization}}{{else}}Mutaxassis{{/if}}</p>
+
+          <div class="doctor-meta mb-3">
+            <span><i class="fas fa-award me-1"></i>{{#if this.experience}}{{this.experience}}{{else}}0{{/if}} yil</span>
+            <span><i class="fas fa-door-open me-1"></i>Xona {{#if this.room_number}}{{this.room_number}}{{else}}—{{/if}}</span>
+          </div>
+
+          <p class="text-muted small mb-3" style="line-height:1.5; min-height:3em;">{{#if this.bio}}{{this.bio}}{{else}}Malakali mutaxassis shifokor{{/if}}</p>
+        </div>
+
+        <div>
+          {{#if ../user}}
+            {{#if (eq ../user.role 'patient')}}
+              <a href="/patient/book/{{this._id}}" class="btn-book w-100">
+                <i class="fas fa-calendar-plus me-2"></i>Qabulga yozilish
+              </a>
+            {{/if}}
+          {{else}}
+            <a href="/login" class="btn-book-outline w-100">
+              <i class="fas fa-sign-in-alt me-2"></i>Kirish kerak
+            </a>
+          {{/if}}
+        </div>
+      </div>
+    </div>
+  {{else}}
+    <div class="col-12 text-center py-5 sc-fade">
+      <i class="fas fa-user-md fa-4x text-muted mb-3 d-block"></i>
+      <h5 class="text-muted">Bu bo'limda hozircha shifokorlar mavjud emas</h5>
+    </div>
+  {{/each}}
+</div>

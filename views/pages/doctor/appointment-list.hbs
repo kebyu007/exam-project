@@ -48,7 +48,7 @@
                   <i class="fas fa-check me-1"></i>Tasdiqlash
                 </button>
               </form>
-              <form action="/doctor/appointments/{{this._id}}/cancel" method="POST" class="flex-fill" aria-label="Qabulni rad etish" onsubmit="return confirm('Rad etishni tasdiqlaysizmi?')">
+              <form action="/doctor/appointments/{{this._id}}/cancel" method="POST" class="flex-fill" onsubmit="return confirm('Rad etishni tasdiqlaysizmi?')">
                 <button type="submit" class="btn-action red w-100">
                   <i class="fas fa-times me-1"></i>Rad etish
                 </button>
@@ -59,6 +59,16 @@
                 <i class="fas fa-file-medical me-1"></i>Retsept yozish
               </button>
             {{/if}}
+            {{#if (eq this.status 'completed')}}
+              {{#if this.prescription}}
+                <button type="button" class="btn-action purple flex-fill" data-bs-toggle="modal" data-bs-target="#viewModal{{this._id}}">
+                  <i class="fas fa-eye me-1"></i>Retseptni ko'rish
+                </button>
+              {{/if}}
+              <button type="button" class="btn-action blue flex-fill" data-bs-toggle="modal" data-bs-target="#prescriptionModal{{this._id}}">
+                <i class="fas fa-edit me-1"></i>Tahrirlash
+              </button>
+            {{/if}}
           </div>
         </div>
       </div>
@@ -67,7 +77,7 @@
 
   {{#each appointments}}
     {{#if (eq this.status 'confirmed')}}
-      <div class="modal fade" id="prescriptionModal{{this._id}}" tabindex="-1" aria-labelledby="prescriptionModalLabel{{this._id}}" aria-modal="true" role="dialog">
+      <div class="modal fade" id="prescriptionModal{{this._id}}" tabindex="-1" aria-modal="true" role="dialog">
         <div class="modal-dialog modal-dialog-centered modal-lg">
           <div class="mm-modal modal-content">
             <div class="mm-header blue">
@@ -99,6 +109,75 @@
           </div>
         </div>
       </div>
+    {{/if}}
+    {{#if (eq this.status 'completed')}}
+      <!-- Edit modal -->
+      <div class="modal fade" id="prescriptionModal{{this._id}}" tabindex="-1" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="mm-modal modal-content">
+            <div class="mm-header blue">
+              <div class="d-flex align-items-center gap-3">
+                <div class="mm-header-icon"><i class="fas fa-edit"></i></div>
+                <div>
+                  <h6 class="mb-0 fw-bold">Retseptni tahrirlash</h6>
+                  <small class="opacity-75">{{this.patient_id.full_name}}</small>
+                </div>
+              </div>
+              <button type="button" class="mm-close" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
+            </div>
+            <form action="/doctor/appointments/{{this._id}}/prescription" method="POST">
+              <div class="mm-body">
+                <div class="mf-field">
+                  <label class="mf-label"><i class="fas fa-pills" style="color:#3b82f6;"></i> Dorilar ro'yxati</label>
+                  <textarea class="mf-textarea mf-input" name="prescription" rows="5" placeholder="Dorilar va dozalarini kiriting...">{{this.prescription}}</textarea>
+                </div>
+                <div class="mf-field mb-0">
+                  <label class="mf-label"><i class="fas fa-clipboard-list" style="color:#3b82f6;"></i> Maslahatlar</label>
+                  <textarea class="mf-textarea mf-input" name="recommendations" rows="5" placeholder="Bemorga maslahatlar...">{{this.recommendations}}</textarea>
+                </div>
+              </div>
+              <div class="mm-footer">
+                <button type="button" class="mm-btn-cancel" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>Yopish</button>
+                <button type="submit" class="mm-btn-save blue"><i class="fas fa-save me-1"></i>Saqlash</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <!-- View modal -->
+      {{#if this.prescription}}
+        <div class="modal fade" id="viewModal{{this._id}}" tabindex="-1" aria-modal="true" role="dialog">
+          <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="mm-modal modal-content">
+              <div class="mm-header purple">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="mm-header-icon"><i class="fas fa-file-medical"></i></div>
+                  <div>
+                    <h6 class="mb-0 fw-bold">Retsept</h6>
+                    <small class="opacity-75">{{this.patient_id.full_name}} · {{formatDate this.appointment_date}}</small>
+                  </div>
+                </div>
+                <button type="button" class="mm-close" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
+              </div>
+              <div class="mm-body">
+                <div class="rx-block mb-3">
+                  <p class="rx-label"><i class="fas fa-pills me-2"></i>Dorilar</p>
+                  <pre class="rx-content">{{this.prescription}}</pre>
+                </div>
+                {{#if this.recommendations}}
+                  <div class="rx-block">
+                    <p class="rx-label"><i class="fas fa-clipboard-list me-2"></i>Maslahatlar</p>
+                    <pre class="rx-content">{{this.recommendations}}</pre>
+                  </div>
+                {{/if}}
+              </div>
+              <div class="mm-footer">
+                <button type="button" class="mm-btn-cancel" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>Yopish</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      {{/if}}
     {{/if}}
   {{/each}}
 {{else}}

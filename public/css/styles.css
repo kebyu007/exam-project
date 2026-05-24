@@ -71,6 +71,7 @@ nav a:hover { color: #fff; background: rgba(255,255,255,.12); }
 .btn-action.green  { background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 3px 10px rgba(16,185,129,0.3); }
 .btn-action.red    { background: linear-gradient(135deg, #ef4444, #dc2626); box-shadow: 0 3px 10px rgba(239,68,68,0.3); }
 .btn-action.blue   { background: linear-gradient(135deg, #3b82f6, #2563eb); box-shadow: 0 3px 10px rgba(59,130,246,0.3); }
+.btn-action-muted { display: flex; align-items: center; justify-content: center; padding: 8px 14px; border-radius: 10px; border: 1.5px solid #e2e8f0; background: #f8fafc; color: #94a3b8; font-size: 0.82rem; font-weight: 500; cursor: not-allowed; }
 
 /* ─── Forms ───────────────────────────────────────────────────────────────── */
 .form-group { margin-bottom: 18px; }

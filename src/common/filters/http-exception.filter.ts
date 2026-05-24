@@ -33,6 +33,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       return res.status(status).json({ message: msg });
     }
 
+    if (res.headersSent) return;
+
     const referer = (req.headers['referer'] || '/').split('?')[0];
     return res.redirect(`${referer}?error=${encodeURIComponent(msg)}`);
   }

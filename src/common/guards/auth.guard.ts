@@ -112,7 +112,7 @@ export class AuthGuard implements CanActivate {
         httpOnly: true,
         secure: this.configService.get('NODE_ENV') === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: 15 * 60 * 1000, // 15 daqiqa — token muddatiga mos
       });
 
       return payload;

@@ -5,7 +5,8 @@ import cookieParser from 'cookie-parser';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import hbs from 'hbs';
-import type { Request, Response, NextFunction } from 'express';
+import helmet from 'helmet';
+import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
 
 process.on('unhandledRejection', (reason: any) => {
   if (reason?.code === 'ETIMEDOUT' || reason?.code === 'ECONNREFUSED') {
@@ -16,40 +17,31 @@ process.on('unhandledRejection', (reason: any) => {
   console.error('Unhandled rejection:', reason);
 });
 
-// Simple in-memory rate limiter for auth endpoints
-const loginAttempts = new Map<string, { count: number; resetAt: number }>();
-function rateLimitMiddleware(req: Request, res: Response, next: NextFunction) {
-  const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0] || req.socket.remoteAddress || 'unknown';
-  const now = Date.now();
-  const entry = loginAttempts.get(ip);
-  if (entry && now < entry.resetAt) {
-    if (entry.count >= 10) {
-      return res.status(429).json({ message: 'Juda ko\'p urinish. 15 daqiqadan keyin qayta urinib ko\'ring.' });
-    }
-    entry.count++;
-  } else {
-    loginAttempts.set(ip, { count: 1, resetAt: now + 15 * 60 * 1000 });
-  }
-  next();
-}
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'warn', 'log'],
   });
 
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com'],
+        scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
+        fontSrc: ["'self'", 'https://cdnjs.cloudflare.com'],
+        imgSrc: ["'self'", 'data:', 'https:'],
+      },
+    },
+  }));
+
   app.enableCors({
     origin: process.env.APP_URL || 'http://localhost:3000',
     credentials: true,
   });
 
+  app.useGlobalFilters(new GlobalExceptionFilter());
   app.use(cookieParser());
-
-  // Rate limit auth endpoints
-  app.use('/login', rateLimitMiddleware);
-  app.use('/register', rateLimitMiddleware);
-  app.use('/forgot-password', rateLimitMiddleware);
-  app.use('/verify-otp', rateLimitMiddleware);
 
   app.useGlobalPipes(
     new ValidationPipe({

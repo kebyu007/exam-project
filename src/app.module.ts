@@ -4,9 +4,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { APP_GUARD } from '@nestjs/core';
 import { WinstonModule } from 'nest-winston';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import * as winston from 'winston';
 import path from 'path';
 import configuration from './config/configuration';
+import { validate } from './config/env.validation';
 import { AuthGuard } from './common/guards/auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { AuthModule } from './modules/auth/auth.module';
@@ -22,7 +24,8 @@ import { TelegramModule } from './modules/telegram/telegram.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
+    ConfigModule.forRoot({ isGlobal: true, load: [configuration], validate }),
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 20 }]),
     MongooseModule.forRoot(process.env.MONGO_URL as string),
     ServeStaticModule.forRoot({
       serveRoot: '/uploads',
@@ -65,6 +68,7 @@ import { TelegramModule } from './modules/telegram/telegram.module';
     ...(process.env.TELEGRAM_BOT_TOKEN ? [TelegramModule] : []),
   ],
   providers: [
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],

@@ -261,8 +261,9 @@ tr:last-child td { border-bottom: none; }
 .spec-tag { display: inline-block; background: linear-gradient(135deg, #10b98115, #05966915); color: #059669; border-radius: 20px; padding: 3px 14px; font-size: 0.82rem; font-weight: 600; }
 .doctor-meta { display: flex; justify-content: center; gap: 16px; font-size: 0.8rem; color: #64748b; }
 .doctor-info { display: flex; flex-direction: column; gap: 6px; }
-.info-row { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #64748b; }
-.info-row i { color: #10b981; width: 14px; text-align: center; }
+.info-row { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #64748b; overflow: hidden; }
+.info-row i { color: #10b981; width: 14px; min-width: 14px; text-align: center; }
+.info-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .btn-book { display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 10px; padding: 10px 20px; font-size: 0.875rem; font-weight: 500; text-decoration: none; transition: opacity 0.2s, transform 0.2s; box-shadow: 0 4px 12px rgba(16,185,129,0.35); }
 .btn-book:hover { opacity: 0.9; transform: translateY(-1px); color: white; }
 .btn-book-outline { display: flex; align-items: center; justify-content: center; background: transparent; color: #10b981; border: 1.5px solid #10b981; border-radius: 10px; padding: 10px 20px; font-size: 0.875rem; font-weight: 500; text-decoration: none; transition: all 0.2s; }
@@ -337,6 +338,7 @@ tr:last-child td { border-bottom: none; }
 .user-avatar { width: 46px; height: 46px; min-width: 46px; background: linear-gradient(135deg, #667eea20, #764ba220); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #667eea; font-size: 1.1rem; }
 .btn-change-role { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 8px 16px; border-radius: 10px; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: opacity 0.2s, transform 0.2s; }
 .btn-change-role:hover { opacity: 0.9; transform: translateY(-1px); }
+.min-w-0 { min-width: 0; }
 
 /* ─── Utility ─────────────────────────────────────────────────────────────── */
 .text-center { text-align: center; }
@@ -495,22 +497,23 @@ a:hover { text-decoration: underline; }
 
 /* ─── Admin Stats ─────────────────────────────────────────────────────────── */
 .stat-card {
-  background: white; border-radius: 16px; padding: 1.25rem 1.5rem;
+  background: white; border-radius: 16px; padding: 1rem;
   box-shadow: 0 2px 12px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.05);
-  display: flex; align-items: center; gap: 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;
 }
+.stat-card > div:last-child { min-width: 0; width: 100%; }
 .stat-icon {
-  width: 56px; height: 56px; border-radius: 16px; flex-shrink: 0;
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.4rem; color: white;
+  font-size: 1.1rem; color: white;
 }
 .stat-icon.purple { background: linear-gradient(135deg, #667eea, #764ba2); box-shadow: 0 4px 16px rgba(102,126,234,0.35); }
 .stat-icon.green  { background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 16px rgba(16,185,129,0.35); }
 .stat-icon.blue   { background: linear-gradient(135deg, #3b82f6, #2563eb); box-shadow: 0 4px 16px rgba(59,130,246,0.35); }
 .stat-icon.amber  { background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 4px 16px rgba(245,158,11,0.35); }
 .stat-icon.red    { background: linear-gradient(135deg, #ef4444, #dc2626); box-shadow: 0 4px 16px rgba(239,68,68,0.35); }
-.stat-value { font-size: 1.75rem; font-weight: 700; color: #1e293b; line-height: 1; }
-.stat-label { font-size: 0.82rem; color: #64748b; margin-top: 2px; }
+.stat-value { font-size: 1.5rem; font-weight: 700; color: #1e293b; line-height: 1; }
+.stat-label { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
 
 /* ─── Password Toggle ─────────────────────────────────────────────────────── */
 .input-password-wrap { position: relative; }
@@ -556,6 +559,7 @@ a:hover { text-decoration: underline; }
   color: #fff !important;
 }
 .nav-register:hover { background: rgba(255,255,255,.22) !important; }
+.nav-active { color: #fff !important; background: rgba(255,255,255,.18) !important; font-weight: 600; }
 @media (max-width: 768px) {
   .navbar-toggler-btn { display: flex; align-items: center; justify-content: center; }
   .nav-menu {
@@ -654,27 +658,6 @@ a:hover { text-decoration: underline; }
 .mf-pass-toggle:hover { color: #667eea; }
 
 /* ─── Footer ──────────────────────────────────────────────────────────────── */
-.sc-footer {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  color: rgba(255,255,255,.7); text-align: center;
-  padding: 24px 20px; margin-top: 48px; font-size: .875rem;
-}
-.sc-footer a { color: rgba(255,255,255,.85); text-decoration: none; }
-.sc-footer a:hover { color: #fff; }
-
-/* ─── Navbar (sc-navbar) ──────────────────────────────────────────────────── */
-.sc-navbar {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  position: sticky; top: 0; z-index: 1000;
-  box-shadow: 0 2px 12px rgba(0,0,0,.3);
-}
-.sc-navbar .container { padding: 14px 20px; }
-.navbar-toggler-btn {
-  display: none; background: rgba(255,255,255,.1); border: none; color: #fff;
-  width: 38px; height: 38px; border-radius: 8px; font-size: 1rem; cursor: pointer;
-  transition: background .2s; align-items: center; justify-content: center;
-}
-.navbar-toggler-btn:hover { background: rgba(255,255,255,.2); }
 .nav-menu { display: flex; align-items: center; gap: 4px; list-style: none; margin: 0; padding: 0; }
 .nav-menu .nav-link { color: #ccd6f6; text-decoration: none; padding: 7px 12px; border-radius: 7px; font-size: 14px; transition: all .2s; white-space: nowrap; }
 .nav-menu .nav-link:hover { color: #fff; background: rgba(255,255,255,.12); text-decoration: none; }

@@ -6,7 +6,6 @@
         <p class="text-muted small mb-4">
           <strong>{{email}}</strong> manziliga 6 xonali kod yuborildi.
         </p>
-        <div id="msg"></div>
         <form id="otpForm">
           <input type="hidden" name="email" value="{{email}}">
           <div class="mb-3">
@@ -40,10 +39,10 @@ document.getElementById('otpForm').addEventListener('submit', async (e) => {
     if (res.ok) {
       window.location.href = data.redirect || '/';
     } else {
-      msg.innerHTML = `<div class="alert alert-danger">${data.message || 'Kod noto\'g\'ri'}</div>`;
+      Toast.error(data.message || 'Kod noto\'g\'ri');
     }
   } catch {
-    msg.innerHTML = '<div class="alert alert-danger">Xatolik yuz berdi</div>';
+    Toast.error('Xatolik yuz berdi');
   }
 });
 </script>

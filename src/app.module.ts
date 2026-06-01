@@ -4,7 +4,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { APP_GUARD } from '@nestjs/core';
 import { WinstonModule } from 'nest-winston';
-import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { HttpThrottlerGuard } from './common/guards/throttler.guard';
 import * as winston from 'winston';
 import path from 'path';
 import configuration from './config/configuration';
@@ -68,7 +69,7 @@ import { TelegramModule } from './modules/telegram/telegram.module';
     ...(process.env.TELEGRAM_BOT_TOKEN ? [TelegramModule] : []),
   ],
   providers: [
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: HttpThrottlerGuard },
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],

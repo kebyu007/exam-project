@@ -15,12 +15,12 @@ export class SignUpDto {
   email: string;
 
   @IsString()
-  @IsStrongPassword({
-    minLength: 6,
-    minLowercase: 1,
-    minSymbols: 1,
-    minNumbers: 1,
-    minUppercase: 1,
-  }, { message: 'Parol kamida 6 ta belgidan iborat bo\'lishi va katta-kichik harf, raqam va maxsus belgi bo\'lishi kerak' })
+  // @IsStrongPassword({
+  //   minLength: 6,
+  //   minLowercase: 1,
+  //   minSymbols: 1,
+  //   minNumbers: 1,
+  //   minUppercase: 1,
+  // }, { message: 'Parol kamida 6 ta belgidan iborat bo\'lishi va katta-kichik harf, raqam va maxsus belgi bo\'lishi kerak' })
   password: string;
 }

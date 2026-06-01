@@ -6,10 +6,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(GlobalExceptionFilter.name);
 
   catch(exception: unknown, host: ArgumentsHost) {
-    const ctx = host.switchToHttp();
-    const req = ctx.getRequest<Request>();
-    const res = ctx.getResponse<Response>();
-
     const status = exception instanceof HttpException
       ? exception.getStatus()
       : HttpStatus.INTERNAL_SERVER_ERROR;
@@ -19,6 +15,18 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       ? (typeof raw === 'object' && 'message' in raw ? (raw as any).message : String(raw))
       : 'Xatolik yuz berdi';
     const msg: string = Array.isArray(message) ? message[0] : message;
+
+    if (host.getType() !== 'http') {
+      this.logger.error(
+        `${status} ${msg}`,
+        exception instanceof Error ? exception.stack : String(exception),
+      );
+      return;
+    }
+
+    const ctx = host.switchToHttp();
+    const req = ctx.getRequest<Request>();
+    const res = ctx.getResponse<Response>();
 
     if (status >= 500) {
       this.logger.error(
